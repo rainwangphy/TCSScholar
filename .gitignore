@@ -1,0 +1,14 @@
+# 抓取产物与 HTTP 缓存
+data/
+.cache/
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+.ipynb_checkpoints/
+
+# macOS
+.DS_Store

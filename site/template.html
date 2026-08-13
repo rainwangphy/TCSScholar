@@ -1,0 +1,880 @@
+<title>TCS 顶会论文档案</title>
+<style>
+/* ── tokens ─────────────────────────────────────────────────────────────
+   浅色是基准；深色只重定义 token，并同时挂在 media query 和 [data-theme]
+   两个作用域下，保证「跟随系统」和「显式切换」两种情况都正确。 */
+:root {
+  color-scheme: light;
+  --page:        #f4f6f9;
+  --surface:     #fbfcfe;
+  --surface-2:   #eef1f6;
+  --ink:         #12151c;
+  --ink-2:       #4a5160;
+  --ink-3:       #767f92;
+  --rule:        #dde3ec;
+  --rule-strong: #c3cbd9;
+  --accent:      #3a3595;
+  --accent-soft: #e9e8f8;
+
+  --s0: #2a78d6;  --s1: #eb6834;  --s2: #1baf7a;  --s3: #eda100;  --s4: #e87ba4;
+  --pos: #2a78d6; --neg: #e34948;
+
+  --q0: #e8eef7;  --q1: #cde2fb;  --q2: #9ec5f4;  --q3: #6da7ec;
+  --q4: #3987e5;  --q5: #256abf;  --q6: #184f95;  --q7: #0d366b;
+
+  --font-display: ui-serif, "New York", "Iowan Old Style", Charter, Georgia, serif;
+  --font-ui: system-ui, -apple-system, "Segoe UI", "PingFang SC", "Hiragino Sans GB", sans-serif;
+  --font-mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace;
+
+  --measure: 66ch;
+  --gutter: clamp(1.1rem, 4vw, 2.75rem);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --page:        #0f1116;
+    --surface:     #171a21;
+    --surface-2:   #1e222b;
+    --ink:         #eef1f6;
+    --ink-2:       #a8b1c2;
+    --ink-3:       #7d8698;
+    --rule:        #262b36;
+    --rule-strong: #39404f;
+    --accent:      #a9a4f5;
+    --accent-soft: #23213f;
+
+    --s0: #3987e5;  --s1: #d95926;  --s2: #199e70;  --s3: #c98500;  --s4: #d55181;
+    --pos: #3987e5; --neg: #e66767;
+
+    --q0: #1b1f28;  --q1: #0d366b;  --q2: #104281;  --q3: #184f95;
+    --q4: #256abf;  --q5: #3987e5;  --q6: #6da7ec;  --q7: #9ec5f4;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --page:        #0f1116;
+  --surface:     #171a21;
+  --surface-2:   #1e222b;
+  --ink:         #eef1f6;
+  --ink-2:       #a8b1c2;
+  --ink-3:       #7d8698;
+  --rule:        #262b36;
+  --rule-strong: #39404f;
+  --accent:      #a9a4f5;
+  --accent-soft: #23213f;
+
+  --s0: #3987e5;  --s1: #d95926;  --s2: #199e70;  --s3: #c98500;  --s4: #d55181;
+  --pos: #3987e5; --neg: #e66767;
+
+  --q0: #1b1f28;  --q1: #0d366b;  --q2: #104281;  --q3: #184f95;
+  --q4: #256abf;  --q5: #3987e5;  --q6: #6da7ec;  --q7: #9ec5f4;
+}
+
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--page);
+  color: var(--ink);
+  font-family: var(--font-ui);
+  font-size: 15px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+.wrap { max-width: 1180px; margin: 0 auto; padding: 0 var(--gutter); }
+
+/* ── masthead ───────────────────────────────────────────────────────── */
+.masthead { padding: clamp(2.5rem, 7vw, 4.5rem) 0 0; }
+.masthead .kicker {
+  font-family: var(--font-mono);
+  font-size: .68rem; letter-spacing: .18em; text-transform: uppercase;
+  color: var(--ink-3); margin: 0 0 1rem;
+}
+.masthead h1 {
+  font-family: var(--font-display);
+  font-size: clamp(2.1rem, 5.6vw, 3.5rem);
+  font-weight: 600; line-height: 1.08; letter-spacing: -.015em;
+  margin: 0; text-wrap: balance;
+}
+.masthead .standfirst {
+  margin: 1.1rem 0 0; max-width: var(--measure);
+  font-size: 1.02rem; color: var(--ink-2);
+}
+.rule-double {
+  margin: 2rem 0 0; border: 0; border-top: 2px solid var(--ink);
+  box-shadow: 0 3px 0 -2px var(--rule-strong);
+}
+
+/* ── stat row ───────────────────────────────────────────────────────── */
+.stats {
+  display: grid; gap: 1px; background: var(--rule);
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  border-bottom: 1px solid var(--rule); margin-bottom: 2.5rem;
+}
+.stat { background: var(--page); padding: 1.15rem 0 1.35rem; }
+.stat:not(:first-child) { padding-left: 1.15rem; }
+.stat .v {
+  font-family: var(--font-mono); font-size: clamp(1.5rem, 3.4vw, 2.05rem);
+  font-weight: 500; letter-spacing: -.02em; color: var(--ink); display: block;
+}
+.stat .k {
+  font-size: .74rem; letter-spacing: .08em; text-transform: uppercase;
+  color: var(--ink-3); margin-top: .3rem; display: block;
+}
+
+/* ── tabs ───────────────────────────────────────────────────────────── */
+.tabs {
+  display: flex; gap: .4rem; position: sticky; top: 0; z-index: 30;
+  background: var(--page); padding: .7rem 0; margin-bottom: 1.5rem;
+  border-bottom: 1px solid var(--rule);
+}
+.tab {
+  font: inherit; font-size: .88rem; cursor: pointer;
+  border: 1px solid transparent; background: none; color: var(--ink-2);
+  padding: .42rem .95rem; border-radius: 2px; letter-spacing: .02em;
+}
+.tab:hover { background: var(--surface-2); color: var(--ink); }
+.tab[aria-selected="true"] {
+  background: var(--accent-soft); color: var(--accent);
+  border-color: color-mix(in srgb, var(--accent) 28%, transparent); font-weight: 600;
+}
+.tab:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible {
+  outline: 2px solid var(--accent); outline-offset: 2px;
+}
+
+/* ── sections ───────────────────────────────────────────────────────── */
+section.block { padding: 2.4rem 0 2.8rem; border-top: 1px solid var(--rule); }
+section.block:first-of-type { border-top: 0; padding-top: .6rem; }
+.sec-head { margin-bottom: 1.5rem; }
+.sec-num {
+  font-family: var(--font-mono); font-size: .7rem; letter-spacing: .16em;
+  color: var(--ink-3); text-transform: uppercase;
+}
+.sec-head h2 {
+  font-family: var(--font-display); font-size: clamp(1.35rem, 2.9vw, 1.75rem);
+  font-weight: 600; margin: .35rem 0 0; letter-spacing: -.01em; text-wrap: balance;
+}
+.sec-head p { margin: .55rem 0 0; max-width: var(--measure); color: var(--ink-2); font-size: .93rem; }
+
+.panel {
+  background: var(--surface); border: 1px solid var(--rule);
+  border-radius: 3px; padding: 1.35rem 1.35rem 1.1rem;
+}
+.panel + .panel { margin-top: 1rem; }
+
+/* ── legend ─────────────────────────────────────────────────────────── */
+.legend { display: flex; flex-wrap: wrap; gap: .35rem 1.1rem; margin: 0 0 1rem; padding: 0; list-style: none; }
+.legend li { display: flex; align-items: center; gap: .4rem; font-size: .81rem; color: var(--ink-2); }
+.swatch { width: 11px; height: 11px; border-radius: 2px; flex: none; box-shadow: 0 0 0 2px var(--surface); }
+.sw0 { background: var(--s0); } .sw1 { background: var(--s1); } .sw2 { background: var(--s2); }
+.sw3 { background: var(--s3); } .sw4 { background: var(--s4); }
+
+/* ── svg chart chrome ───────────────────────────────────────────────── */
+.chart { width: 100%; height: auto; display: block; overflow: visible; }
+.chart text { font-family: var(--font-ui); fill: var(--ink-3); font-size: 11px; }
+.chart .tick-label { font-family: var(--font-mono); font-size: 10.5px; }
+.chart .grid { stroke: var(--rule); stroke-width: 1; }
+.chart .axis { stroke: var(--rule-strong); stroke-width: 1; }
+.chart .area-0 { fill: var(--s0); } .chart .area-1 { fill: var(--s1); }
+.chart .area-2 { fill: var(--s2); } .chart .area-3 { fill: var(--s3); }
+.chart .area-4 { fill: var(--s4); }
+.chart .band { stroke: var(--surface); stroke-width: 2; stroke-linejoin: round; }
+.chart .crosshair { stroke: var(--ink-2); stroke-width: 1; stroke-dasharray: 3 3; pointer-events: none; }
+
+.scroll-x { overflow-x: auto; }
+
+/* ── horizontal bars ────────────────────────────────────────────────── */
+.bars { display: flex; flex-direction: column; gap: 5px; }
+.bar-row {
+  display: grid; grid-template-columns: minmax(96px, 132px) 1fr auto;
+  align-items: center; gap: .7rem; font-size: .84rem;
+}
+.bar-row .lbl { color: var(--ink-2); text-align: right; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.bar-track { background: var(--surface-2); border-radius: 2px; height: 15px; position: relative; }
+/* display:block 是必须的：inline 元素上的 width/height 会被忽略，柱子会全部等长 */
+.bar-fill { display: block; height: 100%; border-radius: 0 4px 4px 0; background: var(--s0); min-width: 2px; }
+.bar-row .val {
+  font-family: var(--font-mono); font-variant-numeric: tabular-nums;
+  font-size: .78rem; color: var(--ink-2); min-width: 5.6ch; text-align: right;
+}
+.bar-row:hover .lbl, .bar-row:hover .val { color: var(--ink); }
+/* 「其他/未分类」是覆盖率的残差，不是一个主题 */
+.muted-row { margin-top: .5rem; padding-top: .5rem; border-top: 1px dashed var(--rule); }
+.muted-row .lbl, .muted-row .val { color: var(--ink-3); font-style: italic; }
+.muted-row .bar-fill { background: var(--rule-strong); }
+
+/* ── heatmap ────────────────────────────────────────────────────────── */
+.heat { border-collapse: separate; border-spacing: 2px; font-size: .78rem; }
+.heat th {
+  font-weight: 400; color: var(--ink-3); font-family: var(--font-mono);
+  font-size: .68rem; padding: 0 2px 4px; white-space: nowrap;
+}
+.heat th.rowlbl {
+  text-align: right; font-family: var(--font-ui); font-size: .79rem;
+  color: var(--ink-2); padding: 0 .6rem 0 0; white-space: nowrap;
+}
+.heat td { width: 30px; height: 22px; border-radius: 2px; cursor: default; }
+.heat td:hover { box-shadow: 0 0 0 2px var(--ink-2); }
+.q0{background:var(--q0)} .q1{background:var(--q1)} .q2{background:var(--q2)} .q3{background:var(--q3)}
+.q4{background:var(--q4)} .q5{background:var(--q5)} .q6{background:var(--q6)} .q7{background:var(--q7)}
+.scale { display: flex; align-items: center; gap: .45rem; font-size: .74rem; color: var(--ink-3); margin-top: .9rem; }
+.scale .steps { display: flex; gap: 2px; }
+.scale .steps i { width: 22px; height: 11px; border-radius: 2px; display: block; }
+
+/* ── fingerprints ───────────────────────────────────────────────────── */
+.fingers { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(215px, 1fr)); }
+.finger { border: 1px solid var(--rule); border-radius: 3px; padding: .9rem 1rem 1rem; background: var(--surface); }
+.finger h3 { margin: 0; font-size: .93rem; font-family: var(--font-ui); font-weight: 650; display: flex; align-items: center; gap: .45rem; }
+.finger .sub { font-size: .73rem; color: var(--ink-3); margin: .25rem 0 .8rem; font-family: var(--font-mono); }
+.finger .bar-row { grid-template-columns: 1fr auto; gap: .5rem; font-size: .79rem; }
+.finger .lbl { text-align: left; }
+.lift-track { position: relative; height: 13px; background: var(--surface-2); border-radius: 2px; margin-top: 3px; }
+.lift-fill { position: absolute; inset-block: 0; left: 0; border-radius: 0 4px 4px 0; }
+.lf0{background:var(--s0)} .lf1{background:var(--s1)} .lf2{background:var(--s2)}
+.lf3{background:var(--s3)} .lf4{background:var(--s4)}
+
+/* ── trends ─────────────────────────────────────────────────────────── */
+.trend-cols { display: grid; gap: 1.6rem; grid-template-columns: repeat(auto-fit, minmax(285px, 1fr)); }
+.trend-col h3 {
+  font-size: .8rem; letter-spacing: .1em; text-transform: uppercase;
+  color: var(--ink-3); margin: 0 0 .85rem; font-weight: 600;
+  display: flex; align-items: center; gap: .45rem;
+}
+.trend-row {
+  display: grid; grid-template-columns: 1fr 62px 46px; gap: .6rem;
+  align-items: center; padding: .3rem 0; border-bottom: 1px solid var(--rule); font-size: .84rem;
+}
+.trend-row:last-child { border-bottom: 0; }
+.trend-row .term { font-family: var(--font-mono); font-size: .82rem; color: var(--ink); }
+.trend-row .mini { height: 9px; background: var(--surface-2); border-radius: 2px; position: relative; }
+.trend-row .mini i { position: absolute; inset-block: 0; left: 0; border-radius: 0 3px 3px 0; display: block; }
+.trend-row .ratio {
+  font-family: var(--font-mono); font-variant-numeric: tabular-nums;
+  font-size: .78rem; text-align: right; color: var(--ink-2);
+}
+.up i { background: var(--pos); } .down i { background: var(--neg); }
+.dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+.dot.up { background: var(--pos); } .dot.down { background: var(--neg); }
+
+/* ── tables ─────────────────────────────────────────────────────────── */
+table.data { width: 100%; border-collapse: collapse; font-size: .86rem; }
+table.data th {
+  text-align: left; font-weight: 600; color: var(--ink-3); font-size: .72rem;
+  letter-spacing: .08em; text-transform: uppercase; padding: 0 .7rem .55rem 0;
+  border-bottom: 1px solid var(--rule-strong);
+}
+table.data td { padding: .42rem .7rem .42rem 0; border-bottom: 1px solid var(--rule); vertical-align: middle; }
+table.data tr:hover td { background: var(--surface-2); }
+table.data .num { font-family: var(--font-mono); font-variant-numeric: tabular-nums; text-align: right; }
+.mix { display: flex; height: 9px; border-radius: 2px; overflow: hidden; min-width: 90px; gap: 1px; }
+.mix i { display: block; height: 100%; }
+.mx0{background:var(--s0)} .mx1{background:var(--s1)} .mx2{background:var(--s2)}
+.mx3{background:var(--s3)} .mx4{background:var(--s4)}
+
+details.tableview { margin-top: 1.1rem; }
+details.tableview summary {
+  cursor: pointer; font-size: .8rem; color: var(--ink-3); padding: .3rem 0;
+  list-style: revert;
+}
+details.tableview summary:hover { color: var(--accent); }
+details.tableview .scroll-x { margin-top: .8rem; max-height: 420px; overflow-y: auto; }
+
+/* ── browse ─────────────────────────────────────────────────────────── */
+.filters {
+  display: flex; flex-wrap: wrap; gap: .6rem; align-items: center;
+  padding: 1rem 0 1.1rem; border-bottom: 1px solid var(--rule); margin-bottom: 1.2rem;
+}
+.filters input[type="search"], .filters select, .filters input[type="number"] {
+  font: inherit; font-size: .87rem; color: var(--ink);
+  background: var(--surface); border: 1px solid var(--rule-strong);
+  border-radius: 2px; padding: .42rem .6rem;
+}
+.filters input[type="search"] { flex: 1 1 260px; min-width: 200px; }
+.filters input[type="number"] { width: 5.6rem; font-family: var(--font-mono); }
+.chips { display: flex; gap: .3rem; flex-wrap: wrap; }
+.chip {
+  font: inherit; font-size: .79rem; cursor: pointer; padding: .32rem .62rem;
+  border: 1px solid var(--rule-strong); background: var(--surface);
+  color: var(--ink-2); border-radius: 2px; display: flex; align-items: center; gap: .35rem;
+}
+.chip:hover { border-color: var(--ink-3); color: var(--ink); }
+.chip[aria-pressed="true"] { background: var(--accent-soft); border-color: var(--accent); color: var(--ink); font-weight: 600; }
+.chip .swatch { box-shadow: none; }
+.result-meta {
+  display: flex; justify-content: space-between; align-items: baseline;
+  gap: 1rem; flex-wrap: wrap; margin-bottom: .8rem;
+  font-size: .84rem; color: var(--ink-3); font-family: var(--font-mono);
+}
+.paper-list { display: flex; flex-direction: column; }
+.paper {
+  padding: .78rem 0; border-bottom: 1px solid var(--rule);
+  display: grid; grid-template-columns: 4.2rem 1fr; gap: .9rem;
+}
+.paper .meta-col { font-family: var(--font-mono); font-size: .74rem; color: var(--ink-3); line-height: 1.5; }
+.paper .venue-tag { display: block; font-weight: 600; letter-spacing: .03em; }
+.paper .ttl { margin: 0; font-size: .95rem; font-weight: 550; line-height: 1.4; color: var(--ink); }
+.paper .ttl a { color: inherit; text-decoration: none; border-bottom: 1px solid var(--rule-strong); }
+.paper .ttl a:hover { color: var(--accent); border-color: var(--accent); }
+.paper .authors { margin: .22rem 0 0; font-size: .83rem; color: var(--ink-2); }
+.paper .tags { display: flex; gap: .3rem; flex-wrap: wrap; margin-top: .38rem; }
+.paper .tag {
+  font-size: .7rem; color: var(--ink-3); border: 1px solid var(--rule);
+  border-radius: 2px; padding: .05rem .38rem; background: var(--surface);
+}
+.vt0 { color: var(--s0); } .vt1 { color: var(--s1); } .vt2 { color: var(--s2); }
+.vt3 { color: var(--s3); } .vt4 { color: var(--s4); }
+.more-btn {
+  font: inherit; font-size: .87rem; cursor: pointer; margin: 1.2rem auto 0; display: block;
+  background: var(--surface); border: 1px solid var(--rule-strong); color: var(--ink);
+  padding: .55rem 1.5rem; border-radius: 2px;
+}
+.more-btn:hover { border-color: var(--accent); color: var(--accent); }
+.empty { padding: 3rem 0; text-align: center; color: var(--ink-3); }
+mark { background: color-mix(in srgb, var(--accent) 22%, transparent); color: inherit; border-radius: 2px; }
+
+/* ── tooltip ────────────────────────────────────────────────────────── */
+#tip {
+  position: fixed; z-index: 90; pointer-events: none; opacity: 0;
+  transition: opacity .1s ease; background: var(--surface);
+  border: 1px solid var(--rule-strong); border-radius: 3px;
+  padding: .5rem .65rem; font-size: .79rem; line-height: 1.5;
+  box-shadow: 0 4px 16px rgb(0 0 0 / .13); max-width: 250px; color: var(--ink);
+}
+#tip .tip-t { font-weight: 650; margin-bottom: .25rem; }
+#tip .tip-r { display: flex; justify-content: space-between; gap: .9rem; color: var(--ink-2); }
+#tip .tip-r b { font-family: var(--font-mono); font-weight: 500; color: var(--ink); }
+
+/* ── footer ─────────────────────────────────────────────────────────── */
+footer.colophon {
+  border-top: 2px solid var(--ink); margin-top: 3rem;
+  padding: 1.8rem 0 4rem; font-size: .85rem; color: var(--ink-2);
+}
+footer.colophon h3 {
+  font-size: .72rem; letter-spacing: .12em; text-transform: uppercase;
+  color: var(--ink-3); margin: 0 0 .7rem; font-weight: 600;
+}
+footer.colophon p { margin: 0 0 .7rem; max-width: var(--measure); }
+footer.colophon .cols { display: grid; gap: 1.6rem; grid-template-columns: repeat(auto-fit, minmax(255px, 1fr)); }
+code {
+  font-family: var(--font-mono); font-size: .88em;
+  background: var(--surface-2); padding: .1em .35em; border-radius: 2px;
+}
+.hidden { display: none !important; }
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; }
+}
+@media (max-width: 620px) {
+  .bar-row { grid-template-columns: minmax(80px, 104px) 1fr auto; font-size: .8rem; }
+  .paper { grid-template-columns: 1fr; gap: .3rem; }
+  .paper .meta-col { display: flex; gap: .6rem; }
+}
+</style>
+
+<div class="wrap">
+  <header class="masthead">
+    <p class="kicker">FOCS · STOC · SODA · ITCS · EC</p>
+    <h1>理论计算机顶会论文档案</h1>
+    <p class="standfirst">
+      五个 TCS 顶级会议、<b id="hd-total">—</b> 篇论文的完整书目，从 1960 年第一届
+      FOCS 到 2026 年。元数据来自 DBLP，主题标签由标题关键词规则生成。
+    </p>
+    <hr class="rule-double">
+  </header>
+
+  <div class="stats" id="stats"></div>
+
+  <div class="tabs" role="tablist">
+    <button class="tab" role="tab" id="tab-analysis" aria-selected="true" aria-controls="view-analysis">主题分析</button>
+    <button class="tab" role="tab" id="tab-browse" aria-selected="false" aria-controls="view-browse">论文检索</button>
+  </div>
+
+  <!-- ══ 分析 ══════════════════════════════════════════════════════ -->
+  <div id="view-analysis" role="tabpanel" aria-labelledby="tab-analysis">
+
+    <section class="block">
+      <div class="sec-head">
+        <span class="sec-num">01 / 规模</span>
+        <h2>六十六年的产出曲线</h2>
+        <p>每年各会议收录的论文数。SODA 在 1990 年创办、ITCS 在 2010 年加入，
+           加上各会议自身扩容，把年产量从 1960 年代的几十篇推到今天的八百篇以上。</p>
+      </div>
+      <div class="panel">
+        <ul class="legend" id="lg-venues"></ul>
+        <div class="scroll-x"><svg id="ch-years" class="chart" viewBox="0 0 1000 350" role="img"
+          aria-label="1960 至 2026 年各会议年度论文数堆叠面积图"></svg></div>
+      </div>
+    </section>
+
+    <section class="block">
+      <div class="sec-head">
+        <span class="sec-num">02 / 构成</span>
+        <h2>论文都在讲什么</h2>
+        <p>24 个主题的命中篇数。一篇论文可以同时属于多个主题（平均 <b id="hd-avg">—</b> 个），
+           因此各项之和大于总篇数。<b id="hd-cov">—</b> 的论文至少命中一个主题。</p>
+      </div>
+      <div class="panel">
+        <div id="ch-topics" class="bars"></div>
+        <details class="tableview">
+          <summary>查看数据表</summary>
+          <div class="scroll-x"><table class="data" id="tb-topics"></table></div>
+        </details>
+      </div>
+    </section>
+
+    <section class="block">
+      <div class="sec-head">
+        <span class="sec-num">03 / 演变</span>
+        <h2>主题热度随年代迁移</h2>
+        <p><b>按行读</b>：每格深浅是该主题在那个五年段的占比相对于它自身历史峰值的比例，
+           所以一行就是一个领域的兴衰曲线。跨行比较绝对规模请看上一节——行与行之间的深浅
+           不可比。早期时段样本量小，波动天然更大。</p>
+      </div>
+      <div class="panel">
+        <div class="scroll-x"><table class="heat" id="ch-heat"></table></div>
+        <div class="scale">
+          <span>该主题的低谷</span><span class="steps" id="scale-steps"></span><span>该主题的峰值</span>
+        </div>
+        <details class="tableview">
+          <summary>查看数据表</summary>
+          <div class="scroll-x"><table class="data" id="tb-heat"></table></div>
+        </details>
+      </div>
+    </section>
+
+    <section class="block">
+      <div class="sec-head">
+        <span class="sec-num">04 / 分工</span>
+        <h2>每个会议的偏好指纹</h2>
+        <p>用「专精度」衡量：该主题在这个会议里的占比 ÷ 在全部论文里的占比。
+           2.0 表示这个会议发该主题论文的密度是整体平均的两倍。只统计该会议内 ≥20 篇的主题。</p>
+      </div>
+      <div class="fingers" id="ch-fingers"></div>
+    </section>
+
+    <section class="block">
+      <div class="sec-head">
+        <span class="sec-num">05 / 词汇</span>
+        <h2>升温与降温的术语</h2>
+        <p>比较 2014–2026 与 1995–2013 两个时期，标题里每千篇论文的术语出现率之比。
+           这是词频统计，不是语义判断——同一个概念换了说法就会被算成两个词。</p>
+      </div>
+      <div class="panel">
+        <div class="trend-cols">
+          <div class="trend-col">
+            <h3><span class="dot up"></span>升温最快</h3>
+            <div id="ch-rising"></div>
+          </div>
+          <div class="trend-col">
+            <h3><span class="dot down"></span>降温最快</h3>
+            <div id="ch-declining"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="block">
+      <div class="sec-head">
+        <span class="sec-num">06 / 作者</span>
+        <h2>高产作者</h2>
+        <p>按 DBLP 的作者 ID 统计，同名不同人不会被合并。色条显示这位作者的论文在五个会议间的分布。</p>
+      </div>
+      <div class="panel">
+        <div class="scroll-x"><table class="data" id="tb-authors"></table></div>
+      </div>
+    </section>
+  </div>
+
+  <!-- ══ 检索 ══════════════════════════════════════════════════════ -->
+  <div id="view-browse" role="tabpanel" aria-labelledby="tab-browse" class="hidden">
+    <div class="filters">
+      <input type="search" id="f-q" placeholder="搜索标题或作者…" aria-label="搜索标题或作者">
+      <div class="chips" id="f-venues"></div>
+      <select id="f-topic" aria-label="按主题筛选"><option value="">全部主题</option></select>
+      <input type="number" id="f-from" placeholder="起始年" aria-label="起始年份">
+      <input type="number" id="f-to" placeholder="结束年" aria-label="结束年份">
+      <select id="f-sort" aria-label="排序">
+        <option value="new">最新在前</option>
+        <option value="old">最早在前</option>
+        <option value="title">标题 A–Z</option>
+      </select>
+    </div>
+    <div class="result-meta">
+      <span id="r-count">—</span>
+      <span id="r-shown"></span>
+    </div>
+    <div class="paper-list" id="r-list"></div>
+    <button class="more-btn hidden" id="r-more">加载更多</button>
+  </div>
+
+  <footer class="colophon">
+    <div class="cols">
+      <div>
+        <h3>数据来源</h3>
+        <p>全部书目元数据抓自 DBLP 官方检索 API，覆盖 FOCS、STOC、SODA、ITCS
+           （DBLP 中为 <code>conf/innovations</code>）与 EC（<code>conf/sigecom</code>）
+           的全部历届论文集，抓取于 2026 年 8 月。只包含元数据，不含论文全文或摘要。</p>
+      </div>
+      <div>
+        <h3>主题标签是怎么来的</h3>
+        <p>用手工整理的正则规则匹配论文标题，一篇可命中多个主题。这是<b>初步的启发式分类，
+           不是语义模型</b>：标题里没出现关键词的论文会被漏掉，一词多义也会误伤。
+           约四分之一的论文未能归入任何主题，早期年代的占比尤其高。请把趋势当作
+           量级参考，而不是精确测量。</p>
+      </div>
+      <div>
+        <h3>已知口径</h3>
+        <p>论文数按 DBLP 收录条目计，已剔除论文集本身的编辑条目与卷首/目录条目，
+           但仍包含部分单页摘要（EC 尤其明显）。作者按 DBLP 的作者 ID 去重，
+           因此同名不同人不会被错误合并。</p>
+      </div>
+    </div>
+  </footer>
+</div>
+
+<div id="tip" role="status" aria-live="polite"></div>
+
+<script type="application/json" id="site-data">__SITE_DATA__</script>
+<script>
+(function () {
+  "use strict";
+  const D = JSON.parse(document.getElementById("site-data").textContent);
+  const $ = (s, r) => (r || document).querySelector(s);
+  const nf = new Intl.NumberFormat("en-US");
+  const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  const VN = D.venues.map((v) => v.id.toUpperCase());
+  const topicById = Object.fromEntries(D.topics.map((t) => [t.id, t]));
+
+  /* ── tooltip ─────────────────────────────────────────────────── */
+  const tip = $("#tip");
+  function showTip(evt, html) {
+    tip.innerHTML = html;
+    tip.style.opacity = "1";
+    const r = tip.getBoundingClientRect();
+    let x = evt.clientX + 14, y = evt.clientY + 14;
+    if (x + r.width > innerWidth - 8) x = evt.clientX - r.width - 14;
+    if (y + r.height > innerHeight - 8) y = evt.clientY - r.height - 14;
+    tip.style.left = Math.max(8, x) + "px";
+    tip.style.top = Math.max(8, y) + "px";
+  }
+  const hideTip = () => { tip.style.opacity = "0"; };
+  const tipRow = (k, v) => `<div class="tip-r"><span>${esc(k)}</span><b>${esc(v)}</b></div>`;
+
+  /* ── header + stats ──────────────────────────────────────────── */
+  const M = D.meta;
+  $("#hd-total").textContent = nf.format(M.total);
+  $("#hd-avg").textContent = M.avg_labels;
+  $("#hd-cov").textContent = (M.coverage * 100).toFixed(0) + "%";
+  $("#stats").innerHTML = [
+    [nf.format(M.total), "篇论文"],
+    [M.editions, "届会议"],
+    [nf.format(M.authors), "位作者"],
+    [M.year_min + "–" + M.year_max, "年份跨度"],
+    [D.topics.length - 1, "个主题"],
+  ].map(([v, k]) => `<div class="stat"><span class="v">${esc(v)}</span><span class="k">${esc(k)}</span></div>`).join("");
+
+  /* ── 01 stacked area ─────────────────────────────────────────── */
+  (function years() {
+    $("#lg-venues").innerHTML = D.venues.map((v, i) =>
+      `<li><span class="swatch sw${i}"></span>${esc(v.id.toUpperCase())} <span style="color:var(--ink-3)">${nf.format(v.count)}</span></li>`
+    ).join("");
+
+    const years = [];
+    for (let y = M.year_min; y <= M.year_max; y++) years.push(y);
+    const series = D.venues.map((v) => years.map((y) => D.per_venue_year[v.id][String(y)] || 0));
+    const totals = years.map((_, i) => series.reduce((s, arr) => s + arr[i], 0));
+    const yMax = Math.ceil(Math.max(...totals) / 100) * 100;
+
+    const W = 1000, H = 350, mL = 42, mR = 12, mT = 12, mB = 30;
+    const iw = W - mL - mR, ih = H - mT - mB;
+    const px = (i) => mL + (years.length === 1 ? 0 : (i / (years.length - 1)) * iw);
+    const py = (v) => mT + ih - (v / yMax) * ih;
+
+    let svg = "";
+    // grid + y ticks
+    for (let t = 0; t <= 4; t++) {
+      const val = (yMax / 4) * t, y = py(val);
+      svg += `<line class="grid" x1="${mL}" y1="${y}" x2="${W - mR}" y2="${y}"/>`;
+      svg += `<text class="tick-label" x="${mL - 8}" y="${y + 3.5}" text-anchor="end">${val}</text>`;
+    }
+    // stacked bands, drawn top-of-stack downward so gaps read cleanly
+    const cum = years.map(() => 0);
+    const bands = series.map((arr) => {
+      const lower = cum.slice();
+      arr.forEach((v, i) => { cum[i] += v; });
+      return { lower, upper: cum.slice() };
+    });
+    bands.forEach((b, si) => {
+      const up = b.upper.map((v, i) => `${px(i).toFixed(1)},${py(v).toFixed(1)}`).join(" L");
+      const dn = b.lower.map((v, i) => `${px(i).toFixed(1)},${py(v).toFixed(1)}`).reverse().join(" L");
+      svg += `<path class="area-${si} band" d="M${up} L${dn} Z"/>`;
+    });
+    // x axis
+    svg += `<line class="axis" x1="${mL}" y1="${mT + ih}" x2="${W - mR}" y2="${mT + ih}"/>`;
+    years.forEach((y, i) => {
+      if (y % 10 !== 0) return;
+      svg += `<line class="grid" x1="${px(i)}" y1="${mT + ih}" x2="${px(i)}" y2="${mT + ih + 4}"/>`;
+      svg += `<text class="tick-label" x="${px(i)}" y="${mT + ih + 18}" text-anchor="middle">${y}</text>`;
+    });
+    svg += `<line class="crosshair hidden" id="xh" x1="0" y1="${mT}" x2="0" y2="${mT + ih}"/>`;
+    svg += `<rect id="yr-hit" x="${mL}" y="${mT}" width="${iw}" height="${ih}" fill="transparent"/>`;
+    const el = $("#ch-years");
+    el.innerHTML = svg;
+
+    const hit = $("#yr-hit"), xh = $("#xh");
+    hit.addEventListener("pointermove", (e) => {
+      const box = el.getBoundingClientRect();
+      const rel = ((e.clientX - box.left) / box.width) * W;
+      let i = Math.round(((rel - mL) / iw) * (years.length - 1));
+      i = Math.max(0, Math.min(years.length - 1, i));
+      xh.classList.remove("hidden");
+      xh.setAttribute("x1", px(i)); xh.setAttribute("x2", px(i));
+      const rows = D.venues.map((v, si) => series[si][i] ? tipRow(v.id.toUpperCase(), series[si][i]) : "").join("");
+      showTip(e, `<div class="tip-t">${years[i]} 年 · 共 ${totals[i]} 篇</div>${rows || '<div class="tip-r">无收录</div>'}`);
+    });
+    hit.addEventListener("pointerleave", () => { hideTip(); xh.classList.add("hidden"); });
+  })();
+
+  /* ── 02 topic bars ───────────────────────────────────────────── */
+  (function topics() {
+    // 「其他/未分类」不是一个主题，排到最后并弱化，避免它作为最大的一根柱子压掉真正的主题
+    const real = D.topics.filter((t) => t.id !== "other").sort((a, b) => b.count - a.count);
+    const list = real.concat(D.topics.filter((t) => t.id === "other"));
+    const max = real[0].count;
+    $("#ch-topics").innerHTML = list.map((t) => {
+      const isOther = t.id === "other";
+      return `<div class="bar-row${isOther ? " muted-row" : ""}" data-id="${esc(t.id)}" tabindex="0">
+        <span class="lbl" title="${esc(t.zh)}">${esc(t.zh)}</span>
+        <span class="bar-track"><span class="bar-fill" style="width:${Math.min(100, (t.count / max) * 100)}%"></span></span>
+        <span class="val">${nf.format(t.count)}</span></div>`;
+    }).join("");
+    $("#ch-topics").addEventListener("pointermove", (e) => {
+      const row = e.target.closest(".bar-row"); if (!row) return hideTip();
+      const t = topicById[row.dataset.id];
+      showTip(e, `<div class="tip-t">${esc(t.zh)}</div>` +
+        `<div class="tip-r"><span>${esc(t.en)}</span></div>` +
+        tipRow("论文数", nf.format(t.count)) + tipRow("占全部", ((t.count / M.total) * 100).toFixed(1) + "%"));
+    });
+    $("#ch-topics").addEventListener("pointerleave", hideTip);
+
+    $("#tb-topics").innerHTML =
+      `<thead><tr><th>主题</th><th>English</th><th class="num">篇数</th><th class="num">占比</th></tr></thead><tbody>` +
+      list.map((t) => `<tr><td>${esc(t.zh)}</td><td>${esc(t.en)}</td>` +
+        `<td class="num">${nf.format(t.count)}</td><td class="num">${((t.count / M.total) * 100).toFixed(1)}%</td></tr>`).join("") +
+      `</tbody>`;
+  })();
+
+  /* ── 03 heatmap ──────────────────────────────────────────────── */
+  (function heat() {
+    const buckets = Object.keys(D.bucket_total).sort();
+    const topics = D.topics.filter((t) => t.id !== "other").sort((a, b) => b.count - a.count);
+    // 占比 = 该主题在该时段的命中数 / 该时段论文总数
+    const share = (tid, b) => {
+      const tot = D.bucket_total[b] || 0;
+      return tot ? ((D.topic_by_bucket[b] || {})[tid] || 0) / tot : 0;
+    };
+    // 按行归一化：每格深浅是相对该主题自身历史峰值的比例。用全局峰值会让绝大多数格子
+    // 挤在最浅一档，趋势完全读不出来；跨主题的绝对规模看上一节的条形图。
+    const rowPeak = {};
+    topics.forEach((t) => { rowPeak[t.id] = Math.max(...buckets.map((b) => share(t.id, b)), 1e-9); });
+    const step = (tid, v) => (v <= 0 ? 0 : Math.min(7, 1 + Math.floor((v / rowPeak[tid]) * 6.999)));
+
+    let html = `<thead><tr><th class="rowlbl"></th>` +
+      buckets.map((b) => `<th>${esc(b.slice(2, 4))}</th>`).join("") + `</tr></thead><tbody>`;
+    topics.forEach((t) => {
+      html += `<tr><th class="rowlbl" scope="row">${esc(t.zh)}</th>`;
+      buckets.forEach((b) => {
+        const v = share(t.id, b), n = (D.topic_by_bucket[b] || {})[t.id] || 0;
+        html += `<td class="q${step(t.id, v)}" data-t="${esc(t.zh)}" data-b="${esc(b)}" data-n="${n}" data-p="${(v * 100).toFixed(1)}" data-tot="${D.bucket_total[b]}" data-pk="${(rowPeak[t.id] * 100).toFixed(1)}"></td>`;
+      });
+      html += `</tr>`;
+    });
+    $("#ch-heat").innerHTML = html + `</tbody>`;
+    $("#scale-steps").innerHTML = [0, 1, 2, 3, 4, 5, 6, 7].map((i) => `<i class="q${i}"></i>`).join("");
+
+    $("#ch-heat").addEventListener("pointermove", (e) => {
+      const td = e.target.closest("td"); if (!td) return hideTip();
+      showTip(e, `<div class="tip-t">${esc(td.dataset.t)}</div>` +
+        tipRow("时段", td.dataset.b) + tipRow("占该时段", td.dataset.p + "%") +
+        tipRow("篇数", td.dataset.n + " / " + td.dataset.tot) +
+        tipRow("该主题峰值", td.dataset.pk + "%"));
+    });
+    $("#ch-heat").addEventListener("pointerleave", hideTip);
+
+    $("#tb-heat").innerHTML =
+      `<thead><tr><th>主题</th>` + buckets.map((b) => `<th class="num">${esc(b)}</th>`).join("") + `</tr></thead><tbody>` +
+      topics.map((t) => `<tr><td>${esc(t.zh)}</td>` +
+        buckets.map((b) => `<td class="num">${(share(t.id, b) * 100).toFixed(1)}%</td>`).join("") + `</tr>`).join("") +
+      `</tbody>`;
+  })();
+
+  /* ── 04 venue fingerprints ───────────────────────────────────── */
+  (function fingers() {
+    $("#ch-fingers").innerHTML = D.venues.map((v, vi) => {
+      const counts = D.topic_by_venue[v.id] || {};
+      const rows = D.topics.filter((t) => t.id !== "other" && (counts[t.id] || 0) >= 20)
+        .map((t) => ({
+          zh: t.zh,
+          n: counts[t.id],
+          lift: (counts[t.id] / v.count) / (t.count / M.total),
+        }))
+        .sort((a, b) => b.lift - a.lift).slice(0, 6);
+      const max = rows.length ? rows[0].lift : 1;
+      return `<div class="finger">
+        <h3><span class="swatch sw${vi}"></span>${esc(v.id.toUpperCase())}</h3>
+        <div class="sub">${nf.format(v.count)} 篇 · ${v.first}–${v.last}</div>
+        ${rows.map((r) => `<div class="bar-row"><span class="lbl">${esc(r.zh)}</span>
+            <span class="val">${r.lift.toFixed(1)}×</span></div>
+          <div class="lift-track"><span class="lift-fill lf${vi}" style="width:${(r.lift / max) * 100}%"></span></div>`).join("")}
+      </div>`;
+    }).join("");
+  })();
+
+  /* ── 05 term trends ──────────────────────────────────────────── */
+  (function trends() {
+    const render = (items, cls, key) => {
+      const max = Math.max(...items.map((t) => (key === "up" ? t.ratio : 1 / t.ratio)));
+      return items.slice(0, 16).map((t) => {
+        const mag = key === "up" ? t.ratio : 1 / t.ratio;
+        return `<div class="trend-row ${cls}">
+          <span class="term">${esc(t.term)}</span>
+          <span class="mini"><i style="width:${Math.max(4, (mag / max) * 100)}%"></i></span>
+          <span class="ratio">${key === "up" ? t.ratio.toFixed(1) + "×" : "÷" + (1 / t.ratio).toFixed(1)}</span>
+        </div>`;
+      }).join("");
+    };
+    $("#ch-rising").innerHTML = render(D.rising, "up", "up");
+    $("#ch-declining").innerHTML = render(D.declining, "down", "down");
+    const bind = (sel, items) => {
+      $(sel).addEventListener("pointermove", (e) => {
+        const row = e.target.closest(".trend-row"); if (!row) return hideTip();
+        const t = items.find((x) => x.term === row.querySelector(".term").textContent); if (!t) return;
+        showTip(e, `<div class="tip-t">${esc(t.term)}</div>` +
+          tipRow("2014–2026", t.recent + " 篇 (" + t.recent_rate + "‰)") +
+          tipRow("1995–2013", t.past + " 篇 (" + t.past_rate + "‰)"));
+      });
+      $(sel).addEventListener("pointerleave", hideTip);
+    };
+    bind("#ch-rising", D.rising); bind("#ch-declining", D.declining);
+  })();
+
+  /* ── 06 authors ──────────────────────────────────────────────── */
+  (function authors() {
+    const rows = D.top_authors.slice(0, 30);
+    $("#tb-authors").innerHTML =
+      `<thead><tr><th class="num">#</th><th>作者</th><th class="num">篇数</th><th>会议分布</th><th class="num">跨度</th></tr></thead><tbody>` +
+      rows.map((a, i) => {
+        const mix = D.venues.map((v, vi) => {
+          const n = a.venues[v.id] || 0;
+          return n ? `<i class="mx${vi}" style="width:${(n / a.count) * 100}%" title="${v.id.toUpperCase()} ${n}"></i>` : "";
+        }).join("");
+        return `<tr><td class="num" style="color:var(--ink-3)">${i + 1}</td><td>${esc(a.name)}</td>` +
+          `<td class="num">${a.count}</td><td><span class="mix">${mix}</span></td>` +
+          `<td class="num" style="color:var(--ink-3)">${a.span[0]}–${a.span[1]}</td></tr>`;
+      }).join("") + `</tbody>`;
+  })();
+
+  /* ── tabs ────────────────────────────────────────────────────── */
+  const views = { "tab-analysis": "view-analysis", "tab-browse": "view-browse" };
+  Object.keys(views).forEach((id) => {
+    $("#" + id).addEventListener("click", () => {
+      Object.entries(views).forEach(([t, v]) => {
+        const on = t === id;
+        $("#" + t).setAttribute("aria-selected", String(on));
+        $("#" + v).classList.toggle("hidden", !on);
+      });
+      if (id === "tab-browse") ensureBrowse();
+      scrollTo({ top: 0, behavior: "smooth" });
+    });
+  });
+
+  /* ── browse ──────────────────────────────────────────────────── */
+  const C = D.compact;
+  const PAGE = 120;
+  let hay = null, filtered = [], shown = 0, built = false;
+  const state = { q: "", venues: new Set(), topic: "", from: null, to: null, sort: "new" };
+
+  function ensureBrowse() {
+    if (built) return;
+    built = true;
+    $("#f-venues").innerHTML = C.venues.map((v, i) =>
+      `<button class="chip" data-v="${i}" aria-pressed="false"><span class="swatch sw${i}"></span>${esc(v.toUpperCase())}</button>`
+    ).join("");
+    $("#f-topic").innerHTML = `<option value="">全部主题</option>` +
+      D.topics.map((t, i) => `<option value="${i}">${esc(t.zh)}（${nf.format(t.count)}）</option>`).join("");
+    $("#f-from").placeholder = M.year_min; $("#f-to").placeholder = M.year_max;
+
+    $("#f-venues").addEventListener("click", (e) => {
+      const b = e.target.closest(".chip"); if (!b) return;
+      const i = +b.dataset.v;
+      if (state.venues.has(i)) state.venues.delete(i); else state.venues.add(i);
+      b.setAttribute("aria-pressed", String(state.venues.has(i)));
+      apply();
+    });
+    let t = null;
+    $("#f-q").addEventListener("input", (e) => {
+      clearTimeout(t);
+      t = setTimeout(() => { state.q = e.target.value.trim().toLowerCase(); apply(); }, 160);
+    });
+    $("#f-topic").addEventListener("change", (e) => { state.topic = e.target.value; apply(); });
+    $("#f-from").addEventListener("change", (e) => { state.from = e.target.value ? +e.target.value : null; apply(); });
+    $("#f-to").addEventListener("change", (e) => { state.to = e.target.value ? +e.target.value : null; apply(); });
+    $("#f-sort").addEventListener("change", (e) => { state.sort = e.target.value; apply(); });
+    $("#r-more").addEventListener("click", () => render(true));
+    apply();
+  }
+
+  function buildHay() {
+    if (hay) return;
+    hay = C.papers.map((p) => (p[2] + " " + p[3].map((i) => C.authors[i]).join(" ")).toLowerCase());
+  }
+
+  function apply() {
+    if (state.q) buildHay();
+    const tIdx = state.topic === "" ? -1 : +state.topic;
+    filtered = [];
+    for (let i = 0; i < C.papers.length; i++) {
+      const p = C.papers[i];
+      if (state.venues.size && !state.venues.has(p[0])) continue;
+      if (state.from !== null && p[1] < state.from) continue;
+      if (state.to !== null && p[1] > state.to) continue;
+      if (tIdx >= 0 && p[6].indexOf(tIdx) === -1) continue;
+      if (state.q && hay[i].indexOf(state.q) === -1) continue;
+      filtered.push(p);
+    }
+    if (state.sort === "old") filtered.sort((a, b) => a[1] - b[1] || a[2].localeCompare(b[2]));
+    else if (state.sort === "title") filtered.sort((a, b) => a[2].localeCompare(b[2]));
+    else filtered.sort((a, b) => b[1] - a[1] || a[2].localeCompare(b[2]));
+    shown = 0;
+    $("#r-list").innerHTML = "";
+    render(false);
+  }
+
+  function hl(text) {
+    if (!state.q) return esc(text);
+    const i = text.toLowerCase().indexOf(state.q);
+    if (i < 0) return esc(text);
+    return esc(text.slice(0, i)) + "<mark>" + esc(text.slice(i, i + state.q.length)) + "</mark>" + esc(text.slice(i + state.q.length));
+  }
+
+  function render(append) {
+    const slice = filtered.slice(shown, shown + PAGE);
+    const html = slice.map((p) => {
+      const link = p[4] ? "https://doi.org/" + p[4] : (p[5] ? "https://dblp.org/rec/" + p[5] : "");
+      const title = hl(p[2]);
+      const authors = p[3].map((i) => hl(C.authors[i])).join("、") || "—";
+      const tags = p[6].map((i) => `<span class="tag">${esc(D.topics[i].zh)}</span>`).join("");
+      return `<article class="paper">
+        <div class="meta-col"><span class="venue-tag vt${p[0]}">${esc(C.venues[p[0]].toUpperCase())}</span><span>${p[1]}</span></div>
+        <div><h3 class="ttl">${link ? `<a href="${esc(link)}" target="_blank" rel="noopener">${title}</a>` : title}</h3>
+          <p class="authors">${authors}</p><div class="tags">${tags}</div></div>
+      </article>`;
+    }).join("");
+    if (append) $("#r-list").insertAdjacentHTML("beforeend", html);
+    else $("#r-list").innerHTML = html || `<div class="empty">没有匹配的论文，试试放宽筛选条件。</div>`;
+    shown += slice.length;
+    $("#r-count").textContent = nf.format(filtered.length) + " 篇匹配";
+    $("#r-shown").textContent = filtered.length ? "显示 1–" + nf.format(shown) : "";
+    $("#r-more").classList.toggle("hidden", shown >= filtered.length);
+  }
+})();
+</script>
