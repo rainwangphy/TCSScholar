@@ -41,6 +41,20 @@ python crawl.py --user-agent "TCSScholar/0.1 (mailto:you@example.com)"
 
 `python crawl.py --list-venues` 可以随时查看。
 
+## 在线版
+
+分析结果已经发布成一个静态页面：**https://rainwangphy.github.io/TCSScholar/**
+
+本地重新生成：
+
+```bash
+python analyze.py      # 读 data/ 里的抓取结果，写出 data/site_data.json
+python build_site.py   # 把数据内联进 site/template.html，产出 site/index.html
+```
+
+`site/index.html` 是自包含的单文件（不依赖任何外部资源，双击也能离线打开），
+提交后 GitHub Actions（[.github/workflows/pages.yml](.github/workflows/pages.yml)）会自动把它部署到 Pages。
+
 ## 输出
 
 默认写到 `data/`：
