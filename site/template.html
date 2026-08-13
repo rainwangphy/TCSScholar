@@ -327,6 +327,20 @@ details.tableview .scroll-x { margin-top: .8rem; max-height: 420px; overflow-y: 
   font-size: .7rem; color: var(--ink-3); border: 1px solid var(--rule);
   border-radius: 2px; padding: .05rem .38rem; background: var(--surface);
 }
+.paper .abs { margin-top: .45rem; }
+.paper .abs summary {
+  cursor: pointer; font-size: .77rem; color: var(--ink-3);
+  list-style: none; display: inline-flex; align-items: center; gap: .32rem;
+  letter-spacing: .06em; text-transform: uppercase;
+}
+.paper .abs summary::-webkit-details-marker { display: none; }
+.paper .abs summary::before { content: "▸"; font-size: .8em; }
+.paper .abs[open] summary::before { content: "▾"; }
+.paper .abs summary:hover { color: var(--accent); }
+.paper .abs-body {
+  margin: .45rem 0 .25rem; font-size: .85rem; color: var(--ink-2);
+  max-width: var(--measure); border-left: 2px solid var(--rule); padding-left: .8rem;
+}
 .vt0 { color: var(--s0); } .vt1 { color: var(--s1); } .vt2 { color: var(--s2); }
 .vt3 { color: var(--s3); } .vt4 { color: var(--s4); }
 .more-btn {
@@ -525,11 +539,14 @@ code {
   <footer class="colophon">
     <div class="cols">
       <div>
-        <h3>Data source</h3>
+        <h3>Data sources</h3>
         <p>All bibliographic metadata was fetched from DBLP's official search API, covering every
            proceedings of FOCS, STOC, SODA, ITCS (<code>conf/innovations</code> in DBLP) and EC
-           (<code>conf/sigecom</code>), crawled in August 2026. Metadata only — no full text
-           and no abstracts.</p>
+           (<code>conf/sigecom</code>), crawled in August 2026.</p>
+        <p>DBLP carries no abstracts, so those come from <a href="https://openalex.org">OpenAlex</a>,
+           matched by DOI where one exists and otherwise by exact title and year. About
+           <b id="hd-abs">—</b> of papers have one; the rest show no abstract toggle at all.
+           Abstracts load on demand, so the browser fetches them only for papers you open.</p>
       </div>
       <div>
         <h3>Where the topic labels come from</h3>
@@ -584,6 +601,7 @@ code {
   $("#hd-total").textContent = nf.format(M.total);
   $("#hd-avg").textContent = M.avg_labels;
   $("#hd-cov").textContent = (M.coverage * 100).toFixed(0) + "%";
+  $("#hd-abs").textContent = M.abs_count ? (M.abs_count / M.total * 100).toFixed(0) + "%" : "none";
   $("#stats").innerHTML = [
     [nf.format(M.total), "papers"],
     [M.editions, "editions"],
@@ -857,7 +875,41 @@ code {
     $("#f-to").addEventListener("change", (e) => { state.to = clampYear(e.target); apply(); });
     $("#f-sort").addEventListener("change", (e) => { state.sort = e.target.value; apply(); });
     $("#r-more").addEventListener("click", () => render(true));
+
+    // Delegated because the list is re-rendered constantly; `toggle` doesn't bubble,
+    // so the click on <summary> is what we listen for.
+    $("#r-list").addEventListener("click", (e) => {
+      const sum = e.target.closest("summary"); if (!sum) return;
+      const det = sum.parentElement;
+      if (det.dataset.done) return;
+      det.dataset.done = "1";
+      const body = det.querySelector(".abs-body");
+      loadAbstract(+det.dataset.i).then((text) => {
+        if (text === null) {
+          body.textContent = "Could not load the abstract. Check your connection and try again.";
+          delete det.dataset.done;  // allow a retry
+        } else {
+          body.textContent = text || "No abstract available for this paper.";
+        }
+      });
+    });
     apply();
+  }
+
+  /* ── abstracts ───────────────────────────────────────────────────
+     Roughly 19MB of them, so they don't go in this file. They sit in
+     site/abstracts/<n>.json, one shard per SHARD papers in C.papers order, and
+     a shard is fetched the first time someone opens a paper that lives in it. */
+  const SHARD = M.abs_shard || 0;
+  const shards = {};
+  function loadAbstract(idx) {
+    const s = Math.floor(idx / SHARD);
+    if (!shards[s]) {
+      shards[s] = fetch("abstracts/" + s + ".json")
+        .then((r) => { if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); })
+        .catch(() => { delete shards[s]; return null; });  // dropped, so a later click retries
+    }
+    return shards[s].then((arr) => (arr ? arr[idx % SHARD] || "" : null));
   }
 
   function buildHay() {
@@ -876,11 +928,14 @@ code {
       if (state.to !== null && p[1] > state.to) continue;
       if (tIdx >= 0 && p[6].indexOf(tIdx) === -1) continue;
       if (state.q && hay[i].indexOf(state.q) === -1) continue;
-      filtered.push(p);
+      filtered.push(i);
     }
-    if (state.sort === "old") filtered.sort((a, b) => a[1] - b[1] || a[2].localeCompare(b[2]));
-    else if (state.sort === "title") filtered.sort((a, b) => a[2].localeCompare(b[2]));
-    else filtered.sort((a, b) => b[1] - a[1] || a[2].localeCompare(b[2]));
+    // Hold indices, not the records themselves: a paper's index into C.papers is
+    // also what says which abstract shard holds it.
+    const P = C.papers;
+    if (state.sort === "old") filtered.sort((a, b) => P[a][1] - P[b][1] || P[a][2].localeCompare(P[b][2]));
+    else if (state.sort === "title") filtered.sort((a, b) => P[a][2].localeCompare(P[b][2]));
+    else filtered.sort((a, b) => P[b][1] - P[a][1] || P[a][2].localeCompare(P[b][2]));
     shown = 0;
     $("#r-list").innerHTML = "";
     render(false);
@@ -895,15 +950,20 @@ code {
 
   function render(append) {
     const slice = filtered.slice(shown, shown + PAGE);
-    const html = slice.map((p) => {
+    const html = slice.map((idx) => {
+      const p = C.papers[idx];
       const link = p[4] ? "https://doi.org/" + p[4] : (p[5] ? "https://dblp.org/rec/" + p[5] : "");
       const title = hl(p[2]);
       const authors = p[3].map((i) => hl(C.authors[i])).join(", ") || "—";
       const tags = p[6].map((i) => `<span class="tag">${esc(D.topics[i].en)}</span>`).join("");
+      // Only offer the toggle when an abstract actually exists, so it never opens onto nothing
+      const abs = p[7]
+        ? `<details class="abs" data-i="${idx}"><summary>Abstract</summary><p class="abs-body">Loading…</p></details>`
+        : "";
       return `<article class="paper">
         <div class="meta-col"><span class="venue-tag vt${p[0]}">${esc(C.venues[p[0]].toUpperCase())}</span><span>${p[1]}</span></div>
         <div><h3 class="ttl">${link ? `<a href="${esc(link)}" target="_blank" rel="noopener">${title}</a>` : title}</h3>
-          <p class="authors">${authors}</p><div class="tags">${tags}</div></div>
+          <p class="authors">${authors}</p><div class="tags">${tags}</div>${abs}</div>
       </article>`;
     }).join("");
     if (append) $("#r-list").insertAdjacentHTML("beforeend", html);

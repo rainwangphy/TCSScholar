@@ -44,6 +44,13 @@ jobs:
           fi
           mkdir -p _site
           cp site/index.html _site/index.html
+          # 摘要分片，页面点开某篇时按需去取
+          if [ -d site/abstracts ]; then
+            cp -R site/abstracts _site/abstracts
+            echo "staged $(ls site/abstracts | wc -l) abstract shards"
+          else
+            echo "::warning::site/abstracts 不存在，页面上的摘要会加载失败"
+          fi
 
       - uses: actions/upload-pages-artifact@v3
         with:

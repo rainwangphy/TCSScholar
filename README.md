@@ -48,12 +48,31 @@ python crawl.py --user-agent "TCSScholar/0.1 (mailto:you@example.com)"
 本地重新生成：
 
 ```bash
-python analyze.py      # 读 data/ 里的抓取结果，写出 data/site_data.json
-python build_site.py   # 把数据内联进 site/template.html，产出 site/index.html
+python analyze.py                                        # 读 data/ 里的抓取结果，写出 data/site_data.json
+python fetch_abstracts.py --mailto you@example.com       # 可选：从 OpenAlex 补摘要（约 20-40 分钟）
+python build_site.py                                     # 产出 site/index.html 和 site/abstracts/
 ```
 
-`site/index.html` 是自包含的单文件（不依赖任何外部资源，双击也能离线打开），
-提交后 GitHub Actions（[.github/workflows/pages.yml](.github/workflows/pages.yml)）会自动把它部署到 Pages。
+提交后 GitHub Actions（[.github/workflows/pages.yml](.github/workflows/pages.yml)）会自动部署到 Pages。
+
+### 摘要
+
+DBLP 不提供摘要，所以单独跑 [fetch_abstracts.py](fetch_abstracts.py) 从
+[OpenAlex](https://openalex.org)（免费、无需 API key）补，产出 `data/abstracts.jsonl`。
+两条匹配路径：有 DOI 的按 DOI 批量查（一次 50 个），没有的按标题搜索，但**只有标题归一化后
+完全相等、年份相差不超过 1 年才采信**——宁可漏也不能张冠李戴。实测覆盖率约 90%。
+
+摘要总量约 19MB，全部内联会让页面涨到 20MB 以上，所以 `build_site.py` 把它们按
+`compact.papers` 的下标每 200 篇切成一片放进 `site/abstracts/`，页面上点开某篇时才去取
+它所在的那一片（约 230KB），取过的缓存住。**分片的顺序必须和嵌进页面的 `papers` 数组
+严格一致**，因为下标就是定位方式；两者由 `build_site.py` 同一次构建产出，不会走偏。
+
+由此带来两点：`site/index.html` 本身仍是自包含的，分析部分离线可用，但**摘要需要联网**
+（双击本地文件打开时，浏览器的 CORS 策略会挡掉分片请求）；检索框只搜标题和作者，
+不搜摘要正文——那需要先把 19MB 全下下来。
+
+`data/` 不进版本库，所以 CI 无法重新生成页面：线上跑的永远是你本地构建后提交的
+`site/index.html` 和 `site/abstracts/`。数据更新后要重新提交这两者。
 
 ## 输出
 
