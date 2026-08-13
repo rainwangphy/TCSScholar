@@ -506,8 +506,8 @@ code {
       <input type="search" id="f-q" placeholder="Search titles or authors…" aria-label="Search titles or authors">
       <div class="chips" id="f-venues"></div>
       <select id="f-topic" aria-label="Filter by topic"><option value="">All topics</option></select>
-      <input type="number" id="f-from" placeholder="From" aria-label="From year">
-      <input type="number" id="f-to" placeholder="To" aria-label="To year">
+      <input type="number" id="f-from" step="1" placeholder="From" aria-label="From year">
+      <input type="number" id="f-to" step="1" placeholder="To" aria-label="To year">
       <select id="f-sort" aria-label="Sort order">
         <option value="new">Newest first</option>
         <option value="old">Oldest first</option>
@@ -822,6 +822,13 @@ code {
     ).join("");
     $("#f-topic").innerHTML = `<option value="">All topics</option>` +
       D.topics.map((t, i) => `<option value="${i}">${esc(t.en)} (${nf.format(t.count)})</option>`).join("");
+    // The year inputs are bounded by the data: min/max stop the spinner and the
+    // browser's own validation from going out of range, and clampYear catches
+    // typed-in values, which no attribute can prevent.
+    ["#f-from", "#f-to"].forEach((sel) => {
+      $(sel).min = M.year_min;
+      $(sel).max = M.year_max;
+    });
     $("#f-from").placeholder = M.year_min; $("#f-to").placeholder = M.year_max;
 
     $("#f-venues").addEventListener("click", (e) => {
@@ -837,8 +844,17 @@ code {
       t = setTimeout(() => { state.q = e.target.value.trim().toLowerCase(); apply(); }, 160);
     });
     $("#f-topic").addEventListener("change", (e) => { state.topic = e.target.value; apply(); });
-    $("#f-from").addEventListener("change", (e) => { state.from = e.target.value ? +e.target.value : null; apply(); });
-    $("#f-to").addEventListener("change", (e) => { state.to = e.target.value ? +e.target.value : null; apply(); });
+    const clampYear = (el) => {
+      const raw = el.value.trim();
+      if (!raw) return null;
+      const n = Math.round(Number(raw));
+      if (!Number.isFinite(n)) { el.value = ""; return null; }
+      const y = Math.min(M.year_max, Math.max(M.year_min, n));
+      el.value = String(y);  // write it back so the field shows what is actually applied
+      return y;
+    };
+    $("#f-from").addEventListener("change", (e) => { state.from = clampYear(e.target); apply(); });
+    $("#f-to").addEventListener("change", (e) => { state.to = clampYear(e.target); apply(); });
     $("#f-sort").addEventListener("change", (e) => { state.sort = e.target.value; apply(); });
     $("#r-more").addEventListener("click", () => render(true));
     apply();
