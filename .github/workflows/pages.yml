@@ -25,9 +25,13 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
+      # enablement: 仓库没开 Pages 时由 action 自己调 API 开（并设为 Actions 构建），
+      # 免得必须先去 Settings → Pages 手动点一次
       - uses: actions/configure-pages@v5
+        with:
+          enablement: true
 
       # template.html 里还留着 __SITE_DATA__ 占位符，不该发出去
       - name: Stage site
