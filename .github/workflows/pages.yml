@@ -36,6 +36,12 @@ jobs:
       # template.html 里还留着 __SITE_DATA__ 占位符，不该发出去
       - name: Stage site
         run: |
+          # index.html 是本地 build_site.py 的产物；万一忘了跑就提交了模板，
+          # 与其发一个空页面出去，不如让部署直接失败
+          if grep -q '__SITE_DATA__' site/index.html; then
+            echo "::error::site/index.html 还是模板，先跑 python analyze.py && python build_site.py"
+            exit 1
+          fi
           mkdir -p _site
           cp site/index.html _site/index.html
 
