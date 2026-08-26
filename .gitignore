@@ -12,3 +12,6 @@ venv/
 
 # macOS
 .DS_Store
+
+# API keys
+api_keys/
