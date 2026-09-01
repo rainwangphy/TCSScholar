@@ -45,6 +45,9 @@ python crawl.py --user-agent "TCSScholar/0.1 (mailto:you@example.com)"
 
 分析结果已经发布成一个静态页面：**https://rainwangphy.github.io/TCSScholar/**
 
+另有一页每日 arXiv 速读：**https://rainwangphy.github.io/TCSScholar/daily.html**，见下面的
+[每日 arXiv 速读](#每日-arxiv-速读)。
+
 本地重新生成：
 
 ```bash
@@ -85,6 +88,86 @@ DOI 路径结束也存一次，中途停掉不会丢已有成果；`.cache/` 里
 
 `data/` 不进版本库，所以 CI 无法重新生成页面：线上跑的永远是你本地构建后提交的
 `site/index.html` 和 `site/abstracts/`。数据更新后要重新提交这两者。
+
+## 每日 arXiv 速读
+
+除了会议论文库，还有一条独立的每日流水线：抓 arXiv 上当天新上传的 TCS 预印本，排序后让
+模型写中文速读，发布在 **https://rainwangphy.github.io/TCSScholar/daily.html**。
+
+```bash
+python daily.py                      # 抓昨天（UTC），分析并写进 site/daily/
+python daily.py --date 2026-08-27    # 指定某天
+python daily.py --days 7             # 回填最近 7 天（已有的会跳过，加 --force 覆盖）
+python daily.py --no-llm             # 只跑规则层，一次模型都不调
+python daily.py --top 25             # 多分析几篇，默认 15
+```
+
+覆盖 `cs.CC`、`cs.DS`、`cs.DM`、`cs.GT`、`cs.CG` 五个分类，按 `submittedDate` 取当天**首次
+提交**（v1）的论文，所以拿到的是真正的新论文，不含旧论文的修订版。同一篇被多个分类命中时
+只算一次。一天大约四十篇。
+
+### 三层流水线
+
+每一层都能单独降级，上一层的产物不依赖下一层跑成功：
+
+1. **抓取** — arXiv 官方 Atom API，复用 `tcs_crawler/http.py` 的限速客户端。
+2. **规则** — 用 `topics.py` 的关键词规则对**标题加摘要**打主题标签（比只看标题漏得少），
+   再算一个可解释的分数排序。
+3. **模型** — 只把排在前面的 15 篇送给 Gemini，出「主要结果 / 技术手段 / 为什么值得看 /
+   新颖度 / 1-5 星」；另出一段当日综述。约 16 次调用，一天几万 token。
+
+没有 API key 或调用失败时第 3 层整层跳过，页面照常显示前两层的结果，只是那几篇没有速读。
+
+### 打分是怎么算的
+
+四项相加，每一项的得分和理由都会写进 JSON 的 `score_parts`，页面上原样展开显示：
+
+| 项 | 上限 | 说明 |
+|---|---|---|
+| 主题 | 2.0 | 命中的核心主题数 |
+| 核心分类 | 1.0 + 1.0 | 主分类在五个核心分类里，以及跨了几个 |
+| 作者 | 3.0 | 作者在五大会议的历史发文量，取 log 压缩 |
+| 结果强度 | 4.0 | 摘要里「解决公开问题」「首个」「最优」「改进」这类措辞 |
+| 已被接收 | 1.5 | `journal_ref` 或 comment 里写了 accepted / to appear |
+| 非新结果 | −3.0 | 标题是 survey / erratum / note 一类 |
+
+作者那一项按**姓名**匹配 `tcs_crawler/prolific_authors.json`（`analyze.py` 顺带产出，收录在
+五大会议发过 3 篇以上的 3492 位作者）——arXiv 那边没有 DBLP 的作者 id，对不上，所以重名会被
+合并，这也是它权重压在 3 分以内的原因。
+
+**这个分数衡量的是「值得优先看一眼」，不是论文质量**，漏掉好论文是常态。页面上写明了这一点。
+
+### 模型分析的边界
+
+输入只有标题、作者、分类和摘要，模型没读过正文。提示词里要求它摘要没交代的地方直接写
+「摘要未说明」而不是顺着标题编，但仍可能误读、把作者的宣称当既定事实、或者把公式抄错。
+星级是模型的主观判断。页面页脚把这些都讲清楚了。
+
+输出走 Gemini 的 `responseSchema` 结构化约束，比让它写自由文本再正则抠字段稳得多。key 的读取
+顺序是环境变量 `GEMINI_API_KEY` → `api_keys/gemini_api.txt`（后者在 `.gitignore` 里）。
+
+### 自动化
+
+[.github/workflows/daily.yml](.github/workflows/daily.yml) 每天 06:00 UTC 跑一次，抓昨天的论文、
+提交 `site/daily/`，然后把部署那条流水线当可复用 workflow 调起来——Actions 用 `GITHUB_TOKEN`
+推的 commit 不会再触发 `on: push`，所以必须显式调用。
+
+要让它真的调模型，得在仓库 Settings → Secrets → Actions 里加一个 `GEMINI_API_KEY`；
+没加也不会失败，只是每天都只有规则层的结果。也可以在 Actions 页面手动触发，能指定日期和天数。
+
+和会议论文库那条线不一样的是：**每日这条线 CI 能完整跑完**。它不依赖 gitignore 掉的 `data/`，
+结果直接写进随仓库提交的 `site/daily/`，那里既是网页数据源也是持久化存储。日积月累每天约
+80KB，真嫌多可以用 `--keep-days N` 只留最近 N 天。
+
+### 为什么是独立一页
+
+`site/index.html` 把 2.5MB 的分析数据内联在文件里，每天重新构建再提交一份 2.5MB 的 HTML
+不现实，CI 也没有 `data/` 可以重新生成它。`daily.html` 反过来：页面本身是不变的静态文件，
+数据运行时从 `daily/*.json` 取，所以 CI 每天只需要提交一个 80KB 的 JSON。
+
+代价是这一页**必须联网**才能看到内容（双击本地文件打开时，浏览器的同源策略会挡掉 fetch，
+页面会提示你起个本地服务器）。公式用 CDN 上的 KaTeX 渲染，CDN 被挡掉时退化成显示 LaTeX 原文，
+信息不会少。
 
 ## 输出
 
@@ -168,21 +251,38 @@ python crawl.py --since 2026 --refresh
 ## 目录结构
 
 ```
-crawl.py                  入口
+crawl.py                  会议论文抓取入口
+analyze.py                主题分析，产出 site_data.json 和作者先验表
+fetch_abstracts.py        从 OpenAlex 补摘要
+build_site.py             把分析结果嵌进模板，产出 site/index.html
+daily.py                  每日 arXiv 抓取 + 分析入口
 tcs_crawler/
   venues.py               会议 → DBLP key 映射
   http.py                 限速 / 重试 / 缓存的 HTTP 客户端（纯标准库）
   dblp.py                 目录页解析 + 检索 API 翻页
+  arxiv.py                arXiv Atom API，按提交日取当天新论文
+  ranking.py              每日论文的可解释打分与精选
+  gemini.py               Gemini REST 客户端（纯标准库）
+  digest.py               每日速读与综述的提示词和输出 schema
+  topics.py               关键词主题分类规则
   models.py               Paper / Author 数据模型
   storage.py              JSONL / CSV / SQLite 输出
   cli.py                  命令行
+  prolific_authors.json   五大会议高产作者表（analyze.py 产出，随仓库提交）
+site/
+  template.html           会议论文库的页面模板（__SITE_DATA__ 占位）
+  index.html              构建产物，自包含
+  daily.html              每日速读页，静态；数据运行时从 daily/ 取
+  daily/YYYY-MM-DD.json   每天一份结果，同时也是这个功能的持久化存储
+  daily/index.json        日期目录
 ```
 
 ## 可能的扩展
 
 - **摘要**：DBLP 不提供摘要。ITCS 走 LIPIcs（drops.dagstuhl.de）有开放摘要；STOC/FOCS/SODA/EC
   可以用 DOI 去 Crossref (`api.crossref.org/works/<doi>`) 或 Semantic Scholar API 补齐。
-- **预印本**：多数 TCS 论文有 arXiv 或 ECCC 版本，可用标题在 arXiv API 上做匹配。
+- **把每日预印本和会议论文对上**：多数 TCS 论文先挂 arXiv 后进会议，可以用标题匹配把
+  `site/daily/` 里的记录和 `data/tcs_papers.jsonl` 关联起来，看某篇预印本后来中了哪个会。
 - **引用数**：Semantic Scholar 的 `/graph/v1/paper/DOI:<doi>` 可以拿到引用数。
 
 上面这些都建议复用 `tcs_crawler/http.py` 里的客户端（带缓存和限速），新增一个 enrich 步骤即可。

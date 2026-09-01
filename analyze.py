@@ -17,6 +17,10 @@ from tcs_crawler.venues import VENUES
 DATA = Path("data")
 SRC = DATA / "tcs_papers.jsonl"
 OUT = DATA / "site_data.json"
+# daily.py 的作者先验表。它随仓库提交（不像 data/），因为 CI 上跑每日 arXiv
+# 分析时没有 data/ 可读。
+PROLIFIC = Path("tcs_crawler") / "prolific_authors.json"
+PROLIFIC_MIN = 3  # 少于 3 篇的作者信号太弱，留着只会把文件撑大
 
 # 术语趋势分析用的停用词（结构性词汇，不承载主题信息）
 STOP = set("""
@@ -182,6 +186,25 @@ def analyze(rows: list[dict]) -> dict:
     }
 
 
+def write_prolific(rows: list[dict]) -> int:
+    """导出「在五大会议发过 >= PROLIFIC_MIN 篇」的作者表，供 daily.py 打分用。
+
+    按姓名而不是 pid 存：arXiv 那边只有显示名，没有 DBLP 的作者 id，对不上。
+    重名因此会被合并——这也是打分时它权重不高的原因。
+    """
+    counts: Counter = Counter()
+    for r in rows:
+        for a in r["authors"]:
+            counts[a["name"]] += 1
+    table = {name: n for name, n in counts.items() if n >= PROLIFIC_MIN}
+    PROLIFIC.parent.mkdir(parents=True, exist_ok=True)
+    PROLIFIC.write_text(
+        json.dumps(dict(sorted(table.items())), ensure_ascii=False, separators=(",", ":")),
+        encoding="utf-8",
+    )
+    return len(table)
+
+
 def main() -> None:
     rows = load()
     result = analyze(rows)
@@ -193,6 +216,8 @@ def main() -> None:
           f"{m['year_min']}-{m['year_max']}")
     print(f"主题覆盖率 {m['coverage']*100:.1f}%，平均标签 {m['avg_labels']}")
     print(f"写入 {OUT} ({size:.1f} MB)")
+    n_prolific = write_prolific(rows)
+    print(f"写入 {PROLIFIC}（{n_prolific} 位发过 {PROLIFIC_MIN}+ 篇的作者，daily.py 的作者先验）")
     print("\n上升最快的术语:", ", ".join(t["term"] for t in result["rising"][:12]))
     print("下降最快的术语:", ", ".join(t["term"] for t in result["declining"][:12]))
 

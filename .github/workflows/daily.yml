@@ -1,0 +1,84 @@
+name: Daily arXiv digest
+
+on:
+  schedule:
+    # 每天 06:00 UTC 抓「昨天（UTC）」的论文。那时昨天已经彻底结束，
+    # 不会抓到半天的残缺结果。cron 在 GitHub 上经常延迟几十分钟，无所谓。
+    - cron: "0 6 * * *"
+  workflow_dispatch:
+    inputs:
+      date:
+        description: "抓哪天（YYYY-MM-DD，UTC），留空为昨天"
+        required: false
+      days:
+        description: "从该日往前连抓几天"
+        required: false
+        default: "1"
+      force:
+        description: "已有结果也重抓"
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+# 和昨天那次没跑完的排队，不要并发写同一批文件
+concurrency:
+  group: daily-arxiv
+  cancel-in-progress: false
+
+jobs:
+  digest:
+    runs-on: ubuntu-latest
+    outputs:
+      changed: ${{ steps.commit.outputs.changed }}
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      # daily.py 只用标准库，没有 pip install 这一步
+
+      - name: Fetch and analyse
+        env:
+          # 没配这个 secret 时 daily.py 会自己降级成只跑规则层，不会失败
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          # 手动触发的输入走环境变量而不是直接插进命令行，免得输入里的引号和
+          # 分号被 shell 当成语法。定时触发时这些都是空的。
+          IN_DATE: ${{ inputs.date }}
+          IN_DAYS: ${{ inputs.days }}
+          IN_FORCE: ${{ inputs.force }}
+        run: |
+          args=(--days "${IN_DAYS:-1}")
+          [ -n "$IN_DATE" ] && args+=(--date "$IN_DATE")
+          [ "$IN_FORCE" = "true" ] && args+=(--force)
+          python daily.py "${args[@]}"
+
+      - name: Commit
+        id: commit
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add site/daily
+          if git diff --cached --quiet; then
+            echo "没有新数据（周末或已经抓过了）"
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            git commit -m "每日 arXiv：$(ls site/daily/20*.json | wc -l | tr -d ' ') 天"
+            # 定时任务和人手动 push 撞车时重来一次，不必因此整个失败
+            git pull --rebase --autostash origin main
+            git push
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+  # Actions 用 GITHUB_TOKEN 推的 commit 不会再触发别的 workflow（防递归），
+  # 所以这里直接把部署那条流水线当可复用 workflow 调起来。
+  deploy:
+    needs: digest
+    if: needs.digest.outputs.changed == 'true'
+    uses: ./.github/workflows/pages.yml
+    permissions:
+      contents: read
+      pages: write
+      id-token: write

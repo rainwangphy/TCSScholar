@@ -7,6 +7,9 @@ on:
       - "site/**"
       - ".github/workflows/pages.yml"
   workflow_dispatch:
+  # 每日 arXiv 那条流水线提交完新数据后直接调这里部署——Actions 自己推的 commit
+  # 不会触发上面的 push，所以必须显式调用
+  workflow_call:
 
 permissions:
   contents: read
@@ -50,6 +53,17 @@ jobs:
             echo "staged $(ls site/abstracts | wc -l) abstract shards"
           else
             echo "::warning::site/abstracts 不存在，页面上的摘要会加载失败"
+          fi
+          # 每日 arXiv 速读。这一页是纯静态的，数据在运行时从 daily/*.json 取，
+          # 所以不像 index.html 那样需要先在本地构建
+          if [ -f site/daily.html ]; then
+            cp site/daily.html _site/daily.html
+          fi
+          if [ -d site/daily ]; then
+            cp -R site/daily _site/daily
+            echo "staged $(ls site/daily/20*.json 2>/dev/null | wc -l) daily digests"
+          else
+            echo "::warning::site/daily 不存在，每日速读页会是空的（先跑 python daily.py）"
           fi
 
       - uses: actions/upload-pages-artifact@v3
