@@ -45,8 +45,11 @@ python crawl.py --user-agent "TCSScholar/0.1 (mailto:you@example.com)"
 
 分析结果已经发布成一个静态页面：**https://rainwangphy.github.io/TCSScholar/**
 
-另有一页每日 arXiv 速读：**https://rainwangphy.github.io/TCSScholar/daily.html**，见下面的
-[每日 arXiv 速读](#每日-arxiv-速读)。
+页面分三个 tab：**Daily digest**（每日 arXiv 速读）、**Topic analysis**、**Browse papers**，
+URL 里带 `#daily` / `#analysis` / `#browse` 可以直接进某个 tab，`#2026-08-31` 这样的日期
+则直接进那天的速读。详见下面的 [每日 arXiv 速读](#每日-arxiv-速读)。
+
+配色是牛皮纸风格（bone 底 + 黏土色强调），跟随系统深浅色；页面文案和模型输出都是英文。
 
 本地重新生成：
 
@@ -92,7 +95,8 @@ DOI 路径结束也存一次，中途停掉不会丢已有成果；`.cache/` 里
 ## 每日 arXiv 速读
 
 除了会议论文库，还有一条独立的每日流水线：抓 arXiv 上当天新上传的 TCS 预印本，排序后让
-模型写中文速读，发布在 **https://rainwangphy.github.io/TCSScholar/daily.html**。
+模型写英文速读，发布在首页的 **Daily digest** tab
+（**https://rainwangphy.github.io/TCSScholar/#daily**）。
 
 ```bash
 python daily.py                      # 抓昨天（UTC），分析并写进 site/daily/
@@ -113,8 +117,8 @@ python daily.py --top 25             # 多分析几篇，默认 15
 1. **抓取** — arXiv 官方 Atom API，复用 `tcs_crawler/http.py` 的限速客户端。
 2. **规则** — 用 `topics.py` 的关键词规则对**标题加摘要**打主题标签（比只看标题漏得少），
    再算一个可解释的分数排序。
-3. **模型** — 只把排在前面的 15 篇送给 Gemini，出「主要结果 / 技术手段 / 为什么值得看 /
-   新颖度 / 1-5 星」；另出一段当日综述。约 16 次调用，一天几万 token。
+3. **模型** — 只把排在前面的 15 篇送给 Gemini，出 result / method / significance /
+   novelty / 1-5 星；另出一段当日综述。约 16 次调用，一天几万 token。
 
 没有 API key 或调用失败时第 3 层整层跳过，页面照常显示前两层的结果，只是那几篇没有速读。
 
@@ -146,6 +150,20 @@ python daily.py --top 25             # 多分析几篇，默认 15
 输出走 Gemini 的 `responseSchema` 结构化约束，比让它写自由文本再正则抠字段稳得多。key 的读取
 顺序是环境变量 `GEMINI_API_KEY` → `api_keys/gemini_api.txt`（后者在 `.gitignore` 里）。
 
+### 公式那两个坑
+
+模型输出里的 LaTeX 有两个静默失效的地方，`digest.py` 各修一层：
+
+1. **转义被吃掉**。模型偶尔漏写一个反斜杠，而 `\t` `\n` `\r` `\f` `\b` 恰好都是**合法**的
+   JSON 转义，于是 `json.loads` 把 `"\tilde"` 无声地解析成 制表符 + `ilde`，宏名就没了，
+   解析器一句警告都没有。`repair_escapes()` 照着控制字符补回来：制表符/换页/退格在单行散文里
+   没有正当用途，见到就还原；`\n` `\r` 有可能是真换行，只在后面紧跟着已知宏名且不粘着别的
+   字母时才动。
+2. **少了定界符**。页面靠 `$...$` 才知道哪段要按数学排版，模型约 2% 的字段会写裸 LaTeX。
+   提示词里明确要求加，`normalize_math()` 再兜一层：从每个 `\command` 出发向两边吃"数学安全"
+   的字符（中文和中文标点是天然边界），括号不配平就原样放过——宁可显示 LaTeX 原文，
+   也好过让 KaTeX 报错标红。
+
 ### 自动化
 
 [.github/workflows/daily.yml](.github/workflows/daily.yml) 每天 06:00 UTC 跑一次，抓昨天的论文、
@@ -159,15 +177,21 @@ python daily.py --top 25             # 多分析几篇，默认 15
 结果直接写进随仓库提交的 `site/daily/`，那里既是网页数据源也是持久化存储。日积月累每天约
 80KB，真嫌多可以用 `--keep-days N` 只留最近 N 天。
 
-### 为什么是独立一页
+### 为什么每日数据不内联
 
-`site/index.html` 把 2.5MB 的分析数据内联在文件里，每天重新构建再提交一份 2.5MB 的 HTML
-不现实，CI 也没有 `data/` 可以重新生成它。`daily.html` 反过来：页面本身是不变的静态文件，
-数据运行时从 `daily/*.json` 取，所以 CI 每天只需要提交一个 80KB 的 JSON。
+`site/index.html` 把 2.6MB 的会议分析数据内联在文件里；每日数据如果也内联，就得每天重新
+构建再提交一份 2.6MB 的 HTML，而 CI 上没有 `data/`，根本重新生成不了它。
 
-代价是这一页**必须联网**才能看到内容（双击本地文件打开时，浏览器的同源策略会挡掉 fetch，
-页面会提示你起个本地服务器）。公式用 CDN 上的 KaTeX 渲染，CDN 被挡掉时退化成显示 LaTeX 原文，
-信息不会少。
+所以 Daily digest 这个 tab 反过来做：**页面本身不含任何每日数据**，第一次点开这个 tab 时才去
+`fetch` `daily/index.json` 和某一天的 `daily/YYYY-MM-DD.json`。于是 CI 每天只需要提交一个
+80KB 的 JSON，`index.html` 一动不动——这条线因此能完全自动跑。
+
+代价是这个 tab **必须联网**才有内容（双击本地文件打开时，浏览器的同源策略会挡掉 fetch，
+tab 里会提示你起个本地服务器）；另外两个 tab 仍然完全离线可用。公式用 CDN 上的 KaTeX 渲染，
+CDN 被挡掉时退化成显示 LaTeX 原文，信息不会少。
+
+`site/daily.html` 现在只是个重定向桩，把早先发出去的链接（含 `#YYYY-MM-DD` 深链）转到
+`index.html#daily`。
 
 ## 输出
 
@@ -270,9 +294,9 @@ tcs_crawler/
   cli.py                  命令行
   prolific_authors.json   五大会议高产作者表（analyze.py 产出，随仓库提交）
 site/
-  template.html           会议论文库的页面模板（__SITE_DATA__ 占位）
+  template.html           页面模板，三个 tab（__SITE_DATA__ 占位）
   index.html              构建产物，自包含
-  daily.html              每日速读页，静态；数据运行时从 daily/ 取
+  daily.html              重定向桩，转到 index.html#daily（旧链接兼容）
   daily/YYYY-MM-DD.json   每天一份结果，同时也是这个功能的持久化存储
   daily/index.json        日期目录
 ```
