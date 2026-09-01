@@ -1,0 +1,1595 @@
+{
+  "note": "Hand-curated registry of open problems in theoretical computer science. This file is the source of truth: open_problems.py never edits it. The pipeline only attaches machine-found `signals` (candidate resolutions) when it writes site/open/index.json, so promoting a problem to `resolved` stays a human edit with a reference attached.",
+  "areas": {
+    "complexity": "Complexity theory",
+    "algorithms": "Algorithms",
+    "structures": "Data structures",
+    "combinatorics": "Combinatorics",
+    "geometry": "Discrete geometry",
+    "economics": "Game theory & fair division",
+    "optimization": "Optimization"
+  },
+  "problems": [
+    {
+      "id": "p-vs-np",
+      "title": "P vs NP",
+      "area": "complexity",
+      "status": "open",
+      "posed": 1971,
+      "statement": "Is every decision problem whose solutions are verifiable in polynomial time also solvable in polynomial time — that is, is $\\mathrm{P}=\\mathrm{NP}$?",
+      "why": "Everything else on this list sits downstream of it. A proof either way would reorganise cryptography, optimisation and the whole notion of what counts as an efficient algorithm.",
+      "evidence": [
+        {
+          "year": 1975,
+          "text": "Relativization barrier: there are oracles $A,B$ with $\\mathrm{P}^A=\\mathrm{NP}^A$ and $\\mathrm{P}^B\\neq\\mathrm{NP}^B$, so no proof that relativizes can settle it (Baker, Gill, Solovay)."
+        },
+        {
+          "year": 1994,
+          "text": "Natural proofs barrier: a proof technique that is constructive and large — as most known circuit lower bounds are — would break strong pseudorandom generators (Razborov, Rudich)."
+        },
+        {
+          "year": 2008,
+          "text": "Algebrization barrier: arithmetization plus an oracle, the technique behind $\\mathrm{IP}=\\mathrm{PSPACE}$, is also insufficient (Aaronson, Wigderson)."
+        },
+        {
+          "year": 2022,
+          "text": "The best explicit lower bound for a problem in $\\mathrm{NP}$ against general Boolean circuits is still barely above $3n$ — nowhere near superlinear, let alone superpolynomial."
+        }
+      ],
+      "refs": [
+        {
+          "label": "Clay Mathematics Institute problem description",
+          "url": "https://www.claymath.org/millennium/p-vs-np/"
+        },
+        {
+          "label": "Wikipedia: P versus NP problem",
+          "url": "https://en.wikipedia.org/wiki/P_versus_NP_problem"
+        }
+      ],
+      "watch": {
+        "terms": [
+          "p versus np",
+          "p vs np",
+          "p = np",
+          "p != np",
+          "p \\neq np",
+          "np-hardness of",
+          "collapse of the polynomial hierarchy"
+        ],
+        "queries": [
+          "all:\"P versus NP\"",
+          "all:\"P vs NP\""
+        ]
+      }
+    },
+    {
+      "id": "np-vs-conp",
+      "title": "NP vs coNP",
+      "area": "complexity",
+      "status": "open",
+      "posed": 1979,
+      "statement": "Is $\\mathrm{NP}=\\mathrm{coNP}$? Equivalently, by Cook–Reckhow, is there a propositional proof system in which every tautology has a proof of polynomial length?",
+      "why": "It is the proof-complexity face of $\\mathrm{P}$ vs $\\mathrm{NP}$, and unlike the original it comes with a concrete programme: prove superpolynomial lower bounds for stronger and stronger proof systems until you reach all of them.",
+      "evidence": [
+        {
+          "year": 1985,
+          "text": "Exponential lower bounds are known for resolution (Haken's pigeonhole bound), and later for cutting planes, polynomial calculus and bounded-depth Frege."
+        },
+        {
+          "year": 2026,
+          "text": "No superpolynomial lower bound is known for Frege or Extended Frege — the programme stalls well below the systems that would settle the question."
+        }
+      ],
+      "refs": [
+        {
+          "label": "Wikipedia: Proof complexity",
+          "url": "https://en.wikipedia.org/wiki/Proof_complexity"
+        },
+        {
+          "label": "ECCC (where proof-complexity preprints usually land first)",
+          "url": "https://eccc.weizmann.ac.il/"
+        }
+      ],
+      "watch": {
+        "terms": [
+          "np = conp",
+          "np versus conp",
+          "extended frege",
+          "frege lower bound",
+          "proof complexity lower bound",
+          "propositional proof system"
+        ],
+        "queries": [
+          "all:\"proof complexity\" AND all:\"lower bound\"",
+          "all:\"Extended Frege\""
+        ]
+      }
+    },
+    {
+      "id": "l-vs-p",
+      "title": "L vs P — is polynomial time computable in logarithmic space?",
+      "area": "complexity",
+      "status": "open",
+      "posed": 1970,
+      "statement": "Is $\\mathrm{L}=\\mathrm{P}$? Separately, is $\\mathrm{L}=\\mathrm{NL}$?",
+      "why": "Space is the one resource where we have had genuine recent movement, and a separation here would be the first unconditional separation of a natural time class from a natural space class.",
+      "evidence": [
+        {
+          "year": 1970,
+          "text": "Savitch: $\\mathrm{NL}\\subseteq\\mathrm{L}^2$, so nondeterminism costs at most a square in space."
+        },
+        {
+          "year": 1988,
+          "text": "Immerman–Szelepcsényi: $\\mathrm{NL}=\\mathrm{coNL}$, closing nondeterministic space under complement."
+        },
+        {
+          "year": 2005,
+          "text": "Reingold: undirected $s$-$t$ connectivity is in $\\mathrm{L}$, collapsing $\\mathrm{SL}$ to $\\mathrm{L}$."
+        },
+        {
+          "year": 2025,
+          "text": "Williams: $\\mathrm{TIME}[t]\\subseteq\\mathrm{SPACE}[\\sqrt{t\\log t}]$ — the first improvement on Hopcroft–Paul–Valiant in fifty years. It sharpens what time buys in space, but says nothing directly about $\\mathrm{L}$ vs $\\mathrm{P}$."
+        }
+      ],
+      "refs": [
+        {
+          "label": "Wikipedia: L (complexity)",
+          "url": "https://en.wikipedia.org/wiki/L_(complexity)"
+        },
+        {
+          "label": "Wikipedia: NL (complexity)",
+          "url": "https://en.wikipedia.org/wiki/NL_(complexity)"
+        }
+      ],
+      "watch": {
+        "terms": [
+          "l = p",
+          "l versus p",
+          "l vs nl",
+          "l = nl",
+          "logspace",
+          "log-space",
+          "space-bounded computation",
+          "catalytic computing",
+          "time-space tradeoff"
+        ],
+        "queries": [
+          "all:\"catalytic computation\"",
+          "all:\"space bounded\" AND cat:cs.CC"
+        ]
+      }
+    },
+    {
+      "id": "p-vs-bpp",
+      "title": "P vs BPP — can randomness always be removed?",
+      "area": "complexity",
+      "status": "open",
+      "posed": 1977,
+      "statement": "Is $\\mathrm{P}=\\mathrm{BPP}$: can every polynomial-time randomised algorithm with bounded error be derandomised with only polynomial overhead?",
+      "why": "Almost everyone believes the answer is yes, and unusually we know exactly what stands in the way — it is equivalent to circuit lower bounds nobody can prove.",
+      "evidence": [
+        {
+          "year": 1997,
+          "text": "Impagliazzo–Wigderson: if $\\mathrm{E}$ requires circuits of size $2^{\\Omega(n)}$ then $\\mathrm{P}=\\mathrm{BPP}$. Hardness buys randomness."
+        },
+        {
+          "year": 2004,
+          "text": "Kabanets–Impagliazzo: the converse direction also bites — derandomising polynomial identity testing implies circuit lower bounds, so this cannot be easy."
+        },
+        {
+          "year": 2002,
+          "text": "Polynomial identity testing has a randomised polynomial-time algorithm (Schwartz–Zippel) and no known deterministic one; it is the canonical hard case."
+        }
+      ],
+      "refs": [
+        {
+          "label": "Wikipedia: BPP (complexity)",
+          "url": "https://en.wikipedia.org/wiki/BPP_(complexity)"
+        },
+        {
+          "label": "Wikipedia: Polynomial identity testing",
+          "url": "https://en.wikipedia.org/wiki/Polynomial_identity_testing"
+        }
+      ],
+      "watch": {
+        "terms": [
+          "p = bpp",
+          "derandomization",
+          "derandomiz",
+          "polynomial identity testing",
+          "pseudorandom generator",
+          "hitting set generator"
+        ],
+        "queries": [
+          "all:\"polynomial identity testing\"",
+          "all:derandomization AND cat:cs.CC"
+        ]
+      }
+    },
+    {
+      "id": "unique-games",
+      "title": "The Unique Games Conjecture",
+      "area": "complexity",
+      "status": "open",
+      "posed": 2002,
+      "statement": "Khot's conjecture: for every $\\epsilon>0$ there is an alphabet size $k$ such that it is $\\mathrm{NP}$-hard to distinguish unique-label-cover instances over $[k]$ that are $(1-\\epsilon)$-satisfiable from those that are at most $\\epsilon$-satisfiable.",
+      "why": "If true it pins down the exact approximation threshold of a long list of problems at once — Max-Cut at the Goemans–Williamson constant, vertex cover at $2$, and every constraint satisfaction problem at its semidefinite-programming bound.",
+      "evidence": [
+        {
+          "year": 2018,
+          "text": "Khot–Minzer–Safra proved the 2-to-2 Games Theorem, which gives the conjecture's hardness with imperfect completeness — half of the statement, and the largest step so far."
+        },
+        {
+          "year": 2010,
+          "text": "Arora–Barak–Steurer gave a $2^{n^{\\epsilon}}$-time algorithm, so unique games is not as hard as 3-SAT is believed to be; the conjecture cannot be proved by reductions with polynomial blow-up unless the Exponential Time Hypothesis fails."
+        },
+        {
+          "year": 2015,
+          "text": "Sum-of-squares relaxations solve the known hard instances, and no candidate hard distribution has survived."
+        }
+      ],
+      "refs": [
+        {
+          "label": "Wikipedia: Unique games conjecture",
+          "url": "https://en.wikipedia.org/wiki/Unique_games_conjecture"
+        }
+      ],
+      "watch": {
+        "terms": [
+          "unique games conjecture",
+          "unique games",
+          "2-to-2 games",
+          "small set expansion",
+          "grassmann graph"
+        ],
+        "queries": [
+          "all:\"unique games conjecture\"",
+          "all:\"small set expansion\""
+        ]
+      }
+    },
+    {
+      "id": "seth",
+      "title": "Is the Strong Exponential Time Hypothesis true?",
+      "area": "complexity",
+      "status": "open",
+      "posed": 2001,
+      "statement": "SETH asserts that for every $\\epsilon>0$ there is a $k$ such that $k$-SAT cannot be solved in time $O(2^{(1-\\epsilon)n})$. Is it true — or is there a uniformly faster algorithm for CNF-SAT?",
+      "why": "A large fraction of modern fine-grained lower bounds — edit distance, orthogonal vectors, graph diameter, longest common subsequence — are conditional on SETH. Refuting it would void them all at once; proving it is out of reach, since it implies $\\mathrm{P}\\neq\\mathrm{NP}$.",
+      "evidence": [
+        {
+          "year": 2001,
+          "text": "Impagliazzo–Paturi–Zane introduced ETH and SETH and proved the sparsification lemma that makes them usable as reduction sources."
+        },
+        {
+          "year": 2026,
+          "text": "The best known $k$-SAT algorithms run in $2^{n(1-c/k)}$ for a constant $c$, which approaches $2^n$ as $k$ grows — consistent with SETH but not evidence for it."
+        },
+        {
+          "year": 2016,
+          "text": "Variants of the hypothesis have been separated from one another, so the family is not monolithic — but no CNF-SAT algorithm beating $2^{(1-\\epsilon)n}$ for all $k$ is known."
+        }
+      ],
+      "refs": [
+        {
+          "label": "Wikipedia: Exponential time hypothesis",
+          "url": "https://en.wikipedia.org/wiki/Exponential_time_hypothesis"
+        }
+      ],
+      "watch": {
+        "terms": [
+          "strong exponential time hypothesis",
+          "seth",
+          "exponential time hypothesis",
+          "fine-grained complexity",
+          "refuting seth",
+          "orthogonal vectors"
+        ],
+        "queries": [
+          "all:\"Strong Exponential Time Hypothesis\"",
+          "all:\"fine-grained complexity\""
+        ]
+      }
+    },
+    {
+      "id": "matrix-multiplication",
+      "title": "Is the matrix multiplication exponent $\\omega$ equal to $2$?",
+      "area": "algorithms",
+      "status": "open",
+      "posed": 1969,
+      "statement": "Let $\\omega$ be the infimum of exponents $c$ with an $O(n^c)$ algorithm for multiplying two $n\\times n$ matrices. Is $\\omega=2$?",
+      "why": "It is the exponent behind a large share of algebraic and graph algorithms, and it is one of the few central constants where the gap between what we can do and what we can rule out has narrowed steadily rather than not at all.",
+      "evidence": [
+        {
+          "year": 1969,
+          "text": "Strassen broke the cubic barrier with $O(n^{2.81})$, opening the question."
+        },
+        {
+          "year": 2024,
+          "text": "The best published upper bound is below $2.372$ (Alman, Duan, Vassilevska Williams, Xu, Xu, Zhou), refining the Coppersmith–Winograd laser method."
+        },
+        {
+          "year": 2015,
+          "text": "Barrier results (Ambainis–Filmus–Le Gall; Alman–Vassilevska Williams) show the laser method applied to the known tensors cannot reach $2$, so $\\omega=2$ needs a new idea."
+        },
+        {
+          "year": 2026,
+          "text": "The only lower bound is the trivial $\\omega\\geq 2$; nothing above it is known."
+        }
+      ],
+      "refs": [
+        {
+          "label": "Wikipedia: Computational complexity of matrix multiplication",
+          "url": "https://en.wikipedia.org/wiki/Computational_complexity_of_matrix_multiplication"
+        }
+      ],
+      "watch": {
+        "terms": [
+          "matrix multiplication exponent",
+          "fast matrix multiplication",
+          "omega < 2",
+          "laser method",
+          "coppersmith-winograd",
+          "value of omega"
+        ],
+        "queries": [
+          "all:\"matrix multiplication exponent\"",
+          "all:\"fast matrix multiplication\""
+        ]
+      }
+    },
+    {
+      "id": "graph-isomorphism",
+      "title": "Is graph isomorphism in P?",
+      "area": "algorithms",
+      "status": "open",
+      "posed": 1972,
+      "statement": "Can one decide in polynomial time whether two finite graphs are isomorphic?",
+      "why": "It is the best-known natural problem in $\\mathrm{NP}$ that is neither known to be in $\\mathrm{P}$ nor $\\mathrm{NP}$-complete, and it is unlikely to be $\\mathrm{NP}$-complete — that would collapse the polynomial hierarchy.",
+      "evidence": [
+        {
+          "year": 2016,
+          "text": "Babai gave a quasipolynomial $n^{O(\\log^2 n)}$ algorithm via group-theoretic divide and conquer — a large step, still not polynomial."
+        },
+        {
+          "year": 1987,
+          "text": "If graph isomorphism were $\\mathrm{NP}$-complete the polynomial hierarchy would collapse to its second level (Boppana–Håstad–Zachos), which is why almost nobody expects hardness."
+        },
+        {
+          "year": 2026,
+          "text": "Polynomial algorithms are known for bounded-degree, bounded-genus and bounded-treewidth graphs, but not in general."
+        }
+      ],
+      "refs": [
+        {
+          "label": "Wikipedia: Graph isomorphism problem",
+          "url": "https://en.wikipedia.org/wiki/Graph_isomorphism_problem"
+        },
+        {
+          "label": "Babai, Graph Isomorphism in Quasipolynomial Time",
+          "url": "https://arxiv.org/abs/1512.03547",
+          "arxiv": "1512.03547",
+          "title": "Graph Isomorphism in Quasipolynomial Time"
+        }
+      ],
+      "watch": {
+        "terms": [
+          "graph isomorphism",
+          "isomorphism testing",
+          "weisfeiler-leman",
+          "weisfeiler-lehman",
+          "group isomorphism"
+        ],
+        "queries": [
+          "all:\"graph isomorphism\" AND cat:cs.DS",
+          "all:\"group isomorphism problem\""
+        ]
+      }
+    },
+    {
+      "id": "vp-vs-vnp",
+      "title": "VP vs VNP — permanent versus determinant",
+      "area": "complexity",
+      "status": "open",
+      "posed": 1979,
+      "statement": "Valiant's algebraic analogue of $\\mathrm{P}$ vs $\\mathrm{NP}$: is $\\mathrm{VP}\\neq\\mathrm{VNP}$? Concretely, does writing the $n\\times n$ permanent as a determinant require a matrix of superpolynomial size?",
+      "why": "It is the arithmetic problem that people expect to fall first, because algebraic circuits are rigid enough to attack with algebraic geometry and representation theory.",
+      "evidence": [
+        {
+          "year": 2004,
+          "text": "The determinantal complexity of the $n\\times n$ permanent is known to be $\\Omega(n^2)$ (Mignon–Ressayre), later refined — quadratic, where superpolynomial is needed."
+        },
+        {
+          "year": 2021,
+          "text": "Limaye–Srinivasan–Tavenas proved the first superpolynomial lower bound for constant-depth algebraic circuits, breaking a long stall."
+        },
+        {
+          "year": 2018,
+          "text": "The geometric complexity theory programme's original plan via representation-theoretic multiplicity obstructions was shown not to work as stated (Bürgisser–Ikenmeyer–Panova)."
+        }
+      ],
+      "refs": [
+        {
+          "label": "Wikipedia: Permanent is sharp-P-complete",
+          "url": "https://en.wikipedia.org/wiki/Computing_the_permanent"
+        },
+        {
+          "label": "Wikipedia: Geometric complexity theory",
+          "url": "https://en.wikipedia.org/wiki/Geometric_complexity_theory"
+        }
+      ],
+      "watch": {
+        "terms": [
+          "vp vs vnp",
+          "vp != vnp",
+          "arithmetic circuit lower bound",
+          "algebraic circuit lower bound",
+          "determinantal complexity",
+          "geometric complexity theory",
+          "permanent versus determinant"
+        ],
+        "queries": [
+          "all:\"arithmetic circuit\" AND all:\"lower bound\"",
+          "all:\"geometric complexity theory\""
+        ]
+      }
+    },
+    {
+      "id": "circuit-lower-bounds",
+      "title": "Does NP require superlinear Boolean circuits?",
+      "area": "complexity",
+      "status": "open",
+      "posed": 1949,
+      "statement": "Exhibit an explicit function in $\\mathrm{NP}$ (or even in $\\mathrm{E}^{\\mathrm{NP}}$) that cannot be computed by Boolean circuits of size $O(n)$ over the full binary basis.",
+      "why": "Counting shows almost every Boolean function needs circuits of size $\\Omega(2^n/n)$, yet for a single explicit function we cannot get past a small constant times $n$. The gap between what exists and what we can name is the cleanest measure of how little we can prove.",
+      "evidence": [
+        {
+          "year": 2016,
+          "text": "Find–Golovnev–Hirsch–Kulikov reached $(3+\\tfrac{1}{86})n-o(n)$ using the gate-elimination method."
+        },
+        {
+          "year": 2022,
+          "text": "Li–Yang pushed the constant slightly higher, to roughly $3.1n$ — still linear."
+        },
+        {
+          "year": 1994,
+          "text": "Razborov–Rudich's natural proofs barrier explains why the combinatorial methods that work for restricted circuit classes stall here."
+        }
+      ],
+      "refs": [
+        {
+          "label": "Wikipedia: Circuit complexity",
+          "url": "https://en.wikipedia.org/wiki/Circuit_complexity"
+        }
+      ],
+      "watch": {
+        "terms": [
+          "circuit lower bound",
+          "gate elimination",
+          "circuit complexity of",
+          "matrix rigidity",
+          "rigid matrices",
+          "acc lower bound"
+        ],
+        "queries": [
+          "all:\"circuit lower bounds\"",
+          "all:\"matrix rigidity\""
+        ]
+      }
+    },
+    {
+      "id": "log-rank",
+      "title": "The log-rank conjecture",
+      "area": "complexity",
+      "status": "open",
+      "posed": 1988,
+      "statement": "Lovász–Saks: is the deterministic communication complexity of a Boolean matrix $M$ bounded by $\\mathrm{polylog}(\\mathrm{rank}(M))$?",
+      "why": "It is the sharpest test of how well a purely linear-algebraic quantity captures a combinatorial one, and it has equivalent formulations in graph theory (the Boolean rank / chromatic number connection) that make it hard to dismiss.",
+      "evidence": [
+        {
+          "year": 2014,
+          "text": "Lovett proved an upper bound of roughly $\\sqrt{\\mathrm{rank}}\\cdot\\log\\mathrm{rank}$ — polynomial in the rank, not polylogarithmic."
+        },
+        {
+          "year": 2020,
+          "text": "The largest known gap between deterministic communication complexity and $\\log\\mathrm{rank}$ is only polynomial of small degree, so the conjecture, if false, is not badly false."
+        }
+      ],
+      "refs": [
+        {
+          "label": "Wikipedia: Log-rank conjecture",
+          "url": "https://en.wikipedia.org/wiki/Log-rank_conjecture"
+        }
+      ],
+      "watch": {
+        "terms": [
+          "log-rank conjecture",
+          "log rank conjecture",
+          "communication complexity",
+          "deterministic communication complexity"
+        ],
+        "queries": [
+          "all:\"log-rank conjecture\"",
+          "all:\"communication complexity\" AND cat:cs.CC"
+        ]
+      }
+    },
+    {
+      "id": "integer-multiplication-optimal",
+      "title": "Is $O(n\\log n)$ optimal for integer multiplication?",
+      "area": "algorithms",
+      "status": "open",
+      "posed": 1971,
+      "statement": "Harvey and van der Hoeven gave an $O(n\\log n)$ algorithm for multiplying two $n$-bit integers. Is there a matching $\\Omega(n\\log n)$ lower bound on a general model of computation?",
+      "why": "It is the rare case where the upper bound landed exactly on the conjectured answer, leaving a clean question: can we prove the algorithm optimal, in any model that is not rigged for the purpose?",
+      "evidence": [
+        {
+          "year": 2021,
+          "text": "Harvey–van der Hoeven's $O(n\\log n)$ algorithm settled the upper bound side, matching Schönhage–Strassen's 1971 conjecture."
+        },
+        {
+          "year": 2026,
+          "text": "Lower bounds are known only in restricted models (online algorithms, bounded-coefficient algebraic circuits); nothing superlinear is known for multitape Turing machines or Boolean circuits."
+        }
+      ],
+      "refs": [
+        {
+          "label": "Wikipedia: Multiplication algorithm",
+          "url": "https://en.wikipedia.org/wiki/Multiplication_algorithm"
+        }
+      ],
+      "watch": {
+        "terms": [
+          "integer multiplication",
+          "multiplication algorithm",
+          "schonhage-strassen",
+          "n log n multiplication"
+        ],
+        "queries": [
+          "all:\"integer multiplication\""
+        ]
+      }
+    },
+    {
+      "id": "apsp-subcubic",
+      "title": "Truly subcubic all-pairs shortest paths",
+      "area": "algorithms",
+      "status": "open",
+      "posed": 1975,
+      "statement": "Is there an $O(n^{3-\\epsilon})$-time algorithm, for some fixed $\\epsilon>0$, for all-pairs shortest paths in a weighted directed graph with $n$ vertices?",
+      "why": "It anchors one of the three pillars of fine-grained complexity: a long list of problems is known to be equivalent to APSP, so a subcubic algorithm for any of them breaks all of them.",
+      "evidence": [
+        {
+          "year": 2014,
+          "text": "Williams gave an $n^3/2^{\\Theta(\\sqrt{\\log n})}$ algorithm — faster than cubic by more than any polylogarithmic factor, but not truly subcubic."
+        },
+        {
+          "year": 2010,
+          "text": "A web of subcubic equivalences (Vassilevska Williams–Williams) ties APSP to negative triangle detection, minimum weight cycle, replacement paths and second shortest path."
+        },
+        {
+          "year": 2026,
+          "text": "For unweighted or small-integer-weight graphs, fast matrix multiplication already gives truly subcubic algorithms; the difficulty is real weights."
+        }
+      ],
+      "refs": [
+        {
+          "label": "Wikipedia: All-pairs shortest path problem",
+          "url": "https://en.wikipedia.org/wiki/Shortest_path_problem"
+        }
+      ],
+      "watch": {
+        "terms": [
+          "all-pairs shortest paths",
+          "all pairs shortest path",
+          "apsp",
+          "negative triangle",
+          "min-plus product",
+          "min plus convolution",
+          "truly subcubic"
+        ],
+        "queries": [
+          "all:\"all-pairs shortest paths\"",
+          "all:\"truly subcubic\""
+        ]
+      }
+    },
+    {
+      "id": "deterministic-linear-mst",
+      "title": "A deterministic linear-time minimum spanning tree algorithm",
+      "area": "algorithms",
+      "status": "open",
+      "posed": 1994,
+      "statement": "Is there a deterministic $O(m)$-time algorithm for computing a minimum spanning tree of a graph with $m$ edges in the comparison model?",
+      "why": "Randomised linear time has been available since 1994, so this is a clean instance of the general question of whether randomness buys anything for a concrete, well-understood problem.",
+      "evidence": [
+        {
+          "year": 1995,
+          "text": "Karger–Klein–Tarjan gave a randomised algorithm running in expected linear time."
+        },
+        {
+          "year": 2000,
+          "text": "Chazelle's deterministic algorithm runs in $O(m\\,\\alpha(m,n))$ — inverse-Ackermann away from linear, and no closer since."
+        },
+        {
+          "year": 2002,
+          "text": "Pettie–Ramachandran gave a provably optimal deterministic algorithm whose running time is not known: it matches the (unknown) decision-tree complexity of the problem."
+        }
+      ],
+      "refs": [
+        {
+          "label": "Wikipedia: Minimum spanning tree",
+          "url": "https://en.wikipedia.org/wiki/Minimum_spanning_tree"
+        }
+      ],
+      "watch": {
+        "terms": [
+          "minimum spanning tree",
+          "spanning tree in linear time",
+          "deterministic linear time"
+        ],
+        "queries": [
+          "all:\"minimum spanning tree\" AND cat:cs.DS"
+        ]
+      }
+    },
+    {
+      "id": "dynamic-optimality",
+      "title": "The dynamic optimality conjecture",
+      "area": "structures",
+      "status": "open",
+      "posed": 1985,
+      "statement": "Sleator–Tarjan: are splay trees $O(1)$-competitive against the optimal offline binary search tree for every access sequence?",
+      "why": "It asks whether a single simple online rule can match an offline optimum on a data structure everyone uses — and forty years in, we cannot even name the offline optimum's complexity.",
+      "evidence": [
+        {
+          "year": 2004,
+          "text": "Tango trees (Demaine–Harmon–Iacono–Pătraşcu) are $O(\\log\\log n)$-competitive; later multi-splay and chain-splay trees match that bound. Nothing $O(1)$-competitive is known."
+        },
+        {
+          "year": 2026,
+          "text": "Splay trees are known to satisfy many consequences of dynamic optimality — the static optimality, working set and dynamic finger bounds — without the conjecture itself following."
+        },
+        {
+          "year": 2019,
+          "text": "It is not even known whether the cost of the optimal offline BST can be computed in polynomial time, so the benchmark the conjecture measures against is itself unresolved."
+        }
+      ],
+      "refs": [
+        {
+          "label": "Wikipedia: Splay tree",
+          "url": "https://en.wikipedia.org/wiki/Splay_tree"
+        },
+        {
+          "label": "Wikipedia: Optimal binary search tree",
+          "url": "https://en.wikipedia.org/wiki/Optimal_binary_search_tree"
+        }
+      ],
+      "watch": {
+        "terms": [
+          "dynamic optimality",
+          "splay tree",
+          "binary search tree",
+          "competitive binary search"
+        ],
+        "queries": [
+          "all:\"dynamic optimality\"",
+          "all:\"binary search trees\" AND cat:cs.DS"
+        ]
+      }
+    },
+    {
+      "id": "planted-clique",
+      "title": "The planted clique problem",
+      "area": "algorithms",
+      "status": "open",
+      "posed": 1992,
+      "statement": "A clique of size $k$ is planted in a random graph $G(n,1/2)$. For which $k$ can it be found in polynomial time? Spectral methods work for $k=\\Omega(\\sqrt{n})$; is anything below $\\sqrt{n}$ possible?",
+      "why": "The $\\sqrt{n}$ threshold has become a hardness assumption in its own right — used for lower bounds in sparse PCA, cryptography and property testing — so whether it is real matters far beyond the problem itself.",
+      "evidence": [
+        {
+          "year": 1998,
+          "text": "Alon–Krivelevich–Sudakov find planted cliques of size $c\\sqrt{n}$ via the second eigenvector; the constant has since been reduced but not the exponent."
+        },
+        {
+          "year": 2016,
+          "text": "Sum-of-squares lower bounds (Barak, Hopkins, Kelner, Kothari, Moitra, Potechin) show degree-$d$ SOS needs $k\\gtrsim\\sqrt{n}$, covering the strongest known algorithmic paradigm."
+        },
+        {
+          "year": 2026,
+          "text": "No $\\mathrm{NP}$-hardness is possible in the usual sense — the problem is average-case — so evidence has to come from restricted models."
+        }
+      ],
+      "refs": [
+        {
+          "label": "Wikipedia: Planted clique",
+          "url": "https://en.wikipedia.org/wiki/Planted_clique"
+        }
+      ],
+      "watch": {
+        "terms": [
+          "planted clique",
+          "hidden clique",
+          "sum-of-squares lower bound",
+          "low-degree likelihood"
+        ],
+        "queries": [
+          "all:\"planted clique\"",
+          "all:\"sum-of-squares\" AND all:\"lower bound\""
+        ]
+      }
+    },
+    {
+      "id": "k-server",
+      "title": "The k-server conjecture (deterministic)",
+      "area": "algorithms",
+      "status": "open",
+      "posed": 1988,
+      "statement": "Manasse–McGeoch–Sleator: is there a deterministic $k$-competitive online algorithm for the $k$-server problem on every metric space?",
+      "why": "It is the central question of competitive analysis, and the matching lower bound of $k$ has been known since the problem was posed — only the algorithm is missing.",
+      "evidence": [
+        {
+          "year": 1995,
+          "text": "Koutsoupias–Papadimitriou proved the work function algorithm is $(2k-1)$-competitive on every metric — a factor of two from the conjecture, and unimproved since."
+        },
+        {
+          "year": 2000,
+          "text": "The conjecture is known to hold for several metric families: uniform metrics (paging), trees, line metrics, and metrics with at most $k+2$ points."
+        },
+        {
+          "year": 2022,
+          "text": "The randomised version of the conjecture — $O(\\mathrm{polylog}\\,k)$-competitiveness — was refuted by Bubeck, Coester and Rabani, which removes one common reason for believing the deterministic version."
+        }
+      ],
+      "refs": [
+        {
+          "label": "Wikipedia: K-server problem",
+          "url": "https://en.wikipedia.org/wiki/K-server_problem"
+        }
+      ],
+      "watch": {
+        "terms": [
+          "k-server",
+          "k server problem",
+          "work function algorithm",
+          "competitive ratio",
+          "metrical task system"
+        ],
+        "queries": [
+          "all:\"k-server\"",
+          "all:\"metrical task systems\""
+        ]
+      }
+    },
+    {
+      "id": "tsp-subtour-gap",
+      "title": "The integrality gap of the subtour LP for metric TSP",
+      "area": "optimization",
+      "status": "open",
+      "posed": 1980,
+      "statement": "Is the integrality gap of the Held–Karp subtour elimination relaxation for metric TSP exactly $4/3$?",
+      "why": "It is the cleanest open constant in approximation algorithms: the lower bound $4/3$ comes from a simple family of instances, and the upper bound $3/2$ has barely moved in four decades.",
+      "evidence": [
+        {
+          "year": 1980,
+          "text": "Wolsey's analysis of Christofides' algorithm gives an upper bound of $3/2$ on the gap; the lower bound of $4/3$ comes from explicit instances."
+        },
+        {
+          "year": 2021,
+          "text": "Karlin–Klein–Oveis Gharan gave the first approximation ratio below $3/2$ for metric TSP, by a tiny but unconditional $\\epsilon$, using a randomised max-entropy spanning tree distribution."
+        },
+        {
+          "year": 2026,
+          "text": "For the special case of graph metrics the gap is known to be at most $7/5$ (Sebő–Vygen), still above $4/3$."
+        }
+      ],
+      "refs": [
+        {
+          "label": "Wikipedia: Travelling salesman problem",
+          "url": "https://en.wikipedia.org/wiki/Travelling_salesman_problem"
+        },
+        {
+          "label": "Wikipedia: Christofides algorithm",
+          "url": "https://en.wikipedia.org/wiki/Christofides_algorithm"
+        }
+      ],
+      "watch": {
+        "terms": [
+          "subtour",
+          "held-karp",
+          "traveling salesman",
+          "travelling salesman",
+          "metric tsp",
+          "christofides"
+        ],
+        "queries": [
+          "all:\"traveling salesman\" AND all:approximation",
+          "all:\"subtour\""
+        ]
+      }
+    },
+    {
+      "id": "strongly-polynomial-lp",
+      "title": "A strongly polynomial algorithm for linear programming",
+      "area": "optimization",
+      "status": "open",
+      "posed": 1998,
+      "statement": "Smale's ninth problem: is there an algorithm for linear programming whose number of arithmetic operations is polynomial in the number of variables and constraints alone, independent of the bit length of the input?",
+      "why": "Every polynomial LP algorithm we have — ellipsoid, interior point — pays for precision in the input numbers. Whether that dependence is necessary is the oldest unresolved question about the most-used algorithmic primitive in optimisation.",
+      "evidence": [
+        {
+          "year": 1986,
+          "text": "Tardos gave a strongly polynomial algorithm for LPs whose constraint matrix has small entries, covering combinatorial flow problems but not the general case."
+        },
+        {
+          "year": 2020,
+          "text": "Progress on the simplex method side is blocked by the polynomial Hirsch conjecture: no pivot rule can be strongly polynomial if polytope diameters are superpolynomial."
+        },
+        {
+          "year": 2015,
+          "text": "Randomised pivot rules with subexponential bounds are known (Kalai; Matoušek–Sharir–Welzl), but nothing polynomial."
+        }
+      ],
+      "refs": [
+        {
+          "label": "Wikipedia: Smale's problems",
+          "url": "https://en.wikipedia.org/wiki/Smale%27s_problems"
+        },
+        {
+          "label": "Wikipedia: Linear programming",
+          "url": "https://en.wikipedia.org/wiki/Linear_programming"
+        }
+      ],
+      "watch": {
+        "terms": [
+          "strongly polynomial",
+          "linear programming",
+          "simplex method",
+          "pivot rule",
+          "interior point method"
+        ],
+        "queries": [
+          "all:\"strongly polynomial\"",
+          "all:\"linear programming\" AND cat:cs.DS"
+        ]
+      }
+    },
+    {
+      "id": "polynomial-hirsch",
+      "title": "The polynomial Hirsch conjecture",
+      "area": "geometry",
+      "status": "open",
+      "posed": 2010,
+      "statement": "Is the combinatorial diameter of the graph of a $d$-dimensional polytope with $n$ facets bounded by a polynomial in $n$ and $d$?",
+      "why": "It is the geometric obstacle standing between the simplex method and a strongly polynomial running time: a superpolynomial diameter would rule out every pivot rule at once.",
+      "evidence": [
+        {
+          "year": 2012,
+          "text": "Santos disproved the original Hirsch conjecture (diameter $\\leq n-d$) with an explicit $43$-dimensional counterexample, leaving the polynomial version open."
+        },
+        {
+          "year": 1992,
+          "text": "The best general upper bound is quasi-polynomial, $n^{O(\\log d)}$ (Kalai–Kleitman), later refined by Todd and by Sukegawa but not brought down to polynomial."
+        },
+        {
+          "year": 2026,
+          "text": "Polynomial bounds are known for special classes — transportation polytopes, $0/1$ polytopes (Naddef: diameter at most $d$) — but not in general."
+        }
+      ],
+      "refs": [
+        {
+          "label": "Wikipedia: Hirsch conjecture",
+          "url": "https://en.wikipedia.org/wiki/Hirsch_conjecture"
+        }
+      ],
+      "watch": {
+        "terms": [
+          "hirsch conjecture",
+          "polytope diameter",
+          "diameter of polytopes",
+          "combinatorial diameter"
+        ],
+        "queries": [
+          "all:\"Hirsch conjecture\"",
+          "all:\"polytope diameter\""
+        ]
+      }
+    },
+    {
+      "id": "sunflower",
+      "title": "The sunflower conjecture",
+      "area": "combinatorics",
+      "status": "open",
+      "posed": 1960,
+      "statement": "Erdős–Rado: is there a constant $C$ such that any family of more than $C^k$ sets of size $k$ contains three sets forming a sunflower (pairwise intersections all equal to a common core)?",
+      "why": "Sunflower-free families are the combinatorial obstruction behind several circuit lower bound techniques and matrix multiplication approaches, so the bound's shape propagates directly into complexity theory.",
+      "evidence": [
+        {
+          "year": 1960,
+          "text": "Erdős–Rado's original bound is $k!\\,C^k$; the conjecture is that the factorial can be removed."
+        },
+        {
+          "year": 2020,
+          "text": "Alweiss, Lovett, Wu and Zhang brought it down to $(\\log k)^{k(1+o(1))}$ via a spread-approximation / random restriction argument — the first improvement of the exponent's shape in sixty years."
+        },
+        {
+          "year": 2021,
+          "text": "Rao, and independently Bell–Chueluecha–Warnke, simplified and slightly improved the constant, but $C^k$ remains out of reach."
+        }
+      ],
+      "refs": [
+        {
+          "label": "Wikipedia: Sunflower-free set / Sunflower lemma",
+          "url": "https://en.wikipedia.org/wiki/Sunflower_(mathematics)"
+        }
+      ],
+      "watch": {
+        "terms": [
+          "sunflower conjecture",
+          "sunflower lemma",
+          "erdos-rado",
+          "spread approximation"
+        ],
+        "queries": [
+          "all:\"sunflower conjecture\"",
+          "all:\"sunflower lemma\""
+        ]
+      }
+    },
+    {
+      "id": "union-closed",
+      "title": "The union-closed sets conjecture",
+      "area": "combinatorics",
+      "status": "open",
+      "posed": 1979,
+      "statement": "Frankl: in every finite union-closed family of sets other than $\\{\\emptyset\\}$, is there an element contained in at least half the sets?",
+      "why": "Elementary to state, resistant for forty years, and in 2022 it fell to an information-theoretic argument nobody had tried — which is why the remaining gap between $0.38$ and $0.5$ is now watched closely.",
+      "evidence": [
+        {
+          "year": 2022,
+          "text": "Gilmer broke the problem open with an entropy argument giving a constant of about $0.01$, the first constant bound of any kind."
+        },
+        {
+          "year": 2023,
+          "text": "Several groups independently pushed Gilmer's method to $(3-\\sqrt5)/2\\approx0.3819$, which is the natural barrier of that argument."
+        },
+        {
+          "year": 2026,
+          "text": "Getting from $0.3819$ to $1/2$ appears to need a genuinely different idea; the entropy method's own analysis caps out there."
+        }
+      ],
+      "refs": [
+        {
+          "label": "Wikipedia: Union-closed sets conjecture",
+          "url": "https://en.wikipedia.org/wiki/Union-closed_sets_conjecture"
+        }
+      ],
+      "watch": {
+        "terms": [
+          "union-closed",
+          "union closed sets",
+          "frankl's conjecture",
+          "frankl conjecture"
+        ],
+        "queries": [
+          "all:\"union-closed\"",
+          "all:\"Frankl's conjecture\""
+        ]
+      }
+    },
+    {
+      "id": "hadwiger",
+      "title": "Hadwiger's conjecture on graph colouring",
+      "area": "combinatorics",
+      "status": "open",
+      "posed": 1943,
+      "statement": "Is every graph with no $K_t$ minor $(t-1)$-colourable?",
+      "why": "It is the deepest generalisation of the four colour theorem — the case $t=5$ is equivalent to it, and $t=6$ was proved from it — so anything beyond $t=6$ would be a genuinely new colouring technique.",
+      "evidence": [
+        {
+          "year": 1993,
+          "text": "Robertson–Seymour–Thomas proved the case $t=6$, assuming the four colour theorem. Nothing beyond $t=6$ is known."
+        },
+        {
+          "year": 2023,
+          "text": "The best general bound gives $O(t\\log\\log t)$ colours (Delcourt–Postle), improving a long-standing $O(t\\sqrt{\\log t})$."
+        }
+      ],
+      "refs": [
+        {
+          "label": "Wikipedia: Hadwiger conjecture (graph theory)",
+          "url": "https://en.wikipedia.org/wiki/Hadwiger_conjecture_(graph_theory)"
+        }
+      ],
+      "watch": {
+        "terms": [
+          "hadwiger's conjecture",
+          "hadwiger conjecture",
+          "graph minor",
+          "k_t minor",
+          "clique minor"
+        ],
+        "queries": [
+          "all:\"Hadwiger's conjecture\"",
+          "all:\"clique minor\""
+        ]
+      }
+    },
+    {
+      "id": "erdos-hajnal",
+      "title": "The Erdős–Hajnal conjecture",
+      "area": "combinatorics",
+      "status": "open",
+      "posed": 1989,
+      "statement": "For every fixed graph $H$, is there $\\epsilon(H)>0$ such that every $n$-vertex graph with no induced copy of $H$ contains a clique or independent set of size $n^{\\epsilon}$?",
+      "why": "Random graphs only guarantee $\\Theta(\\log n)$; the conjecture says that forbidding any fixed induced subgraph forces polynomial structure. It has become the organising question of induced subgraph theory.",
+      "evidence": [
+        {
+          "year": 2026,
+          "text": "The general bound remains $e^{\\Omega(\\sqrt{\\log n})}$ (Erdős–Hajnal's own), quasi-polynomial rather than polynomial."
+        },
+        {
+          "year": 2023,
+          "text": "The conjecture is proved for several families — all graphs on at most four vertices, the five-cycle $C_5$ (Chudnovsky, Scott, Seymour, Spirkl), and anything built from those by substitution."
+        }
+      ],
+      "refs": [
+        {
+          "label": "Wikipedia: Erdős–Hajnal conjecture",
+          "url": "https://en.wikipedia.org/wiki/Erd%C5%91s%E2%80%93Hajnal_conjecture"
+        }
+      ],
+      "watch": {
+        "terms": [
+          "erdos-hajnal",
+          "erdős–hajnal",
+          "induced subgraph",
+          "forbidden induced"
+        ],
+        "queries": [
+          "all:\"Erdos-Hajnal\"",
+          "all:\"induced subgraph\" AND cat:math.CO"
+        ]
+      }
+    },
+    {
+      "id": "hadwiger-nelson",
+      "title": "The chromatic number of the plane",
+      "area": "geometry",
+      "status": "open",
+      "posed": 1950,
+      "statement": "Hadwiger–Nelson: how many colours are needed to colour the plane so that no two points at distance exactly $1$ share a colour? It is known that $5\\leq\\chi\\leq7$.",
+      "why": "Seventy-five years with a three-value gap, and the one move in that time came from a hand-built graph an amateur found — which keeps the problem unusually open to new constructions.",
+      "evidence": [
+        {
+          "year": 2018,
+          "text": "de Grey constructed a unit-distance graph with 1581 vertices and chromatic number 5, raising the lower bound from 4 for the first time since 1950."
+        },
+        {
+          "year": 2019,
+          "text": "The Polymath16 project reduced the smallest known 5-chromatic unit-distance graph to 509 vertices, without reaching 6."
+        },
+        {
+          "year": 1950,
+          "text": "The upper bound of 7 comes from a hexagonal tiling and has never been improved."
+        }
+      ],
+      "refs": [
+        {
+          "label": "Wikipedia: Hadwiger–Nelson problem",
+          "url": "https://en.wikipedia.org/wiki/Hadwiger%E2%80%93Nelson_problem"
+        }
+      ],
+      "watch": {
+        "terms": [
+          "chromatic number of the plane",
+          "hadwiger-nelson",
+          "unit-distance graph",
+          "unit distance graph"
+        ],
+        "queries": [
+          "all:\"chromatic number of the plane\"",
+          "all:\"unit-distance graph\""
+        ]
+      }
+    },
+    {
+      "id": "erdos-szekeres",
+      "title": "The Erdős–Szekeres conjecture (happy ending problem)",
+      "area": "geometry",
+      "status": "open",
+      "posed": 1935,
+      "statement": "Is $2^{n-2}+1$ the smallest number of points in general position in the plane that guarantees a convex $n$-gon?",
+      "why": "It is the founding problem of Ramsey theory in geometry, and the conjectured value has been matched by a construction since 1960 — only the upper bound resists.",
+      "evidence": [
+        {
+          "year": 1960,
+          "text": "Erdős–Szekeres gave a construction of $2^{n-2}$ points with no convex $n$-gon, which is conjectured to be extremal."
+        },
+        {
+          "year": 2017,
+          "text": "Suk proved an upper bound of $2^{n+o(n)}$, bringing the exponent's leading term to the conjectured value but not the lower-order terms."
+        },
+        {
+          "year": 2006,
+          "text": "Exact values are known only up to $n=6$, verified by computer search."
+        }
+      ],
+      "refs": [
+        {
+          "label": "Wikipedia: Happy ending problem",
+          "url": "https://en.wikipedia.org/wiki/Happy_ending_problem"
+        }
+      ],
+      "watch": {
+        "terms": [
+          "erdos-szekeres",
+          "happy ending problem",
+          "convex position",
+          "convex polygon",
+          "points in general position"
+        ],
+        "queries": [
+          "all:\"Erdos-Szekeres\"",
+          "all:\"convex position\""
+        ]
+      }
+    },
+    {
+      "id": "unit-distances",
+      "title": "The Erdős unit distance problem",
+      "area": "geometry",
+      "status": "open",
+      "posed": 1946,
+      "statement": "What is the maximum number of unit distances determined by $n$ points in the plane? Erdős conjectured $n^{1+O(1/\\log\\log n)}$; the best known upper bound is $O(n^{4/3})$.",
+      "why": "Its sibling — the distinct distances problem — fell in 2010 to polynomial-method techniques, and those same techniques have so far made no dent here, which sharpens the question of what is different about it.",
+      "evidence": [
+        {
+          "year": 1984,
+          "text": "Spencer, Szemerédi and Trotter proved the $O(n^{4/3})$ upper bound; it has not been improved in forty years."
+        },
+        {
+          "year": 1946,
+          "text": "The lower bound comes from a $\\sqrt n\\times\\sqrt n$ grid and is $n^{1+c/\\log\\log n}$ — superlinear but barely."
+        },
+        {
+          "year": 2015,
+          "text": "Guth–Katz's polynomial method settled the companion distinct distances problem up to a logarithmic factor, but does not transfer to unit distances."
+        }
+      ],
+      "refs": [
+        {
+          "label": "Wikipedia: Unit distance problem",
+          "url": "https://en.wikipedia.org/wiki/Unit_distance_graph"
+        },
+        {
+          "label": "Erdős Problems: unit distances",
+          "url": "https://www.erdosproblems.com/"
+        }
+      ],
+      "watch": {
+        "terms": [
+          "unit distance",
+          "unit distances",
+          "distinct distances",
+          "polynomial method",
+          "incidence geometry"
+        ],
+        "queries": [
+          "all:\"unit distances\"",
+          "all:\"distinct distances\""
+        ]
+      }
+    },
+    {
+      "id": "efx-existence",
+      "title": "Do EFX allocations always exist?",
+      "area": "economics",
+      "status": "open",
+      "posed": 2016,
+      "statement": "Given $n$ agents with additive valuations over indivisible goods, does an allocation that is envy-free up to any good (EFX) always exist? It is known for $n\\leq3$; $n=4$ is open.",
+      "why": "EFX is the strongest fairness notion that is not obviously impossible for indivisible goods, and the fact that we cannot settle four agents makes it the sharpest open question in fair division.",
+      "evidence": [
+        {
+          "year": 2020,
+          "text": "Chaudhury, Garg and Mehlhorn proved existence for three agents with additive valuations; the argument does not extend to four."
+        },
+        {
+          "year": 2021,
+          "text": "Existence is known if a small number of goods may be discarded (partial EFX allocations with bounded charity)."
+        },
+        {
+          "year": 2026,
+          "text": "No counterexample is known either, for any number of agents — the question is genuinely undecided, not merely unproved."
+        }
+      ],
+      "refs": [
+        {
+          "label": "Wikipedia: Envy-free item allocation (EFX)",
+          "url": "https://en.wikipedia.org/wiki/Envy-free_item_allocation"
+        }
+      ],
+      "watch": {
+        "terms": [
+          "efx",
+          "envy-free up to any good",
+          "envy-freeness up to any",
+          "fair division",
+          "indivisible goods"
+        ],
+        "queries": [
+          "all:EFX AND cat:cs.GT",
+          "all:\"envy-free\" AND all:\"indivisible\""
+        ]
+      }
+    },
+    {
+      "id": "cake-cutting-poly",
+      "title": "Polynomial envy-free cake cutting",
+      "area": "economics",
+      "status": "open",
+      "posed": 1995,
+      "statement": "Is there an envy-free cake-cutting protocol for $n$ agents using a number of queries polynomial in $n$ in the Robertson–Webb model?",
+      "why": "A bounded protocol exists, but its query count is a tower of exponentials — one of the largest gaps between 'finite' and 'usable' anywhere in the field.",
+      "evidence": [
+        {
+          "year": 2016,
+          "text": "Aziz and Mackenzie gave the first bounded envy-free protocol for any $n$, using $n^{n^{n^{n^{n^n}}}}$ queries."
+        },
+        {
+          "year": 2009,
+          "text": "The best lower bound is $\\Omega(n^2)$ queries (Procaccia, 2009), leaving a gap of many orders of magnitude in the exponent tower."
+        }
+      ],
+      "refs": [
+        {
+          "label": "Wikipedia: Envy-free cake-cutting",
+          "url": "https://en.wikipedia.org/wiki/Envy-free_cake-cutting"
+        }
+      ],
+      "watch": {
+        "terms": [
+          "cake cutting",
+          "cake-cutting",
+          "envy-free protocol",
+          "robertson-webb"
+        ],
+        "queries": [
+          "all:\"cake cutting\"",
+          "all:\"envy-free\" AND cat:cs.GT"
+        ]
+      }
+    },
+    {
+      "id": "nash-approximation",
+      "title": "Approximating Nash equilibria in bimatrix games",
+      "area": "economics",
+      "status": "open",
+      "posed": 2006,
+      "statement": "What is the best constant $\\epsilon$ for which an $\\epsilon$-approximate Nash equilibrium of a two-player game can be found in polynomial time? The best known is slightly above $1/3$.",
+      "why": "Exact computation is PPAD-complete and a PTAS is ruled out under the exponential-time hypothesis for PPAD, so the whole question is where between $1/3$ and $0$ the true constant sits.",
+      "evidence": [
+        {
+          "year": 2007,
+          "text": "Tsaknakis–Spirakis gave a polynomial algorithm achieving $0.3393$, which stood as the best for fifteen years."
+        },
+        {
+          "year": 2023,
+          "text": "The constant was brought down to essentially $1/3$ (Deligkas, Fasoulakis, Markakis), the first improvement in fifteen years — and still a constant, not an approaching-zero sequence."
+        },
+        {
+          "year": 2016,
+          "text": "Rubinstein showed that under the ETH for PPAD there is no quasi-polynomial-time PTAS, so a constant barrier of some size is expected."
+        }
+      ],
+      "refs": [
+        {
+          "label": "Wikipedia: PPAD (complexity)",
+          "url": "https://en.wikipedia.org/wiki/PPAD_(complexity)"
+        },
+        {
+          "label": "Wikipedia: Epsilon-equilibrium",
+          "url": "https://en.wikipedia.org/wiki/Epsilon-equilibrium"
+        }
+      ],
+      "watch": {
+        "terms": [
+          "approximate nash",
+          "nash equilibrium",
+          "bimatrix game",
+          "ppad",
+          "epsilon-nash"
+        ],
+        "queries": [
+          "all:\"approximate Nash equilibrium\"",
+          "all:PPAD"
+        ]
+      }
+    },
+    {
+      "id": "p-vs-nc",
+      "title": "P vs NC — is everything efficiently parallelisable?",
+      "area": "complexity",
+      "status": "open",
+      "posed": 1979,
+      "statement": "Is $\\mathrm{P}=\\mathrm{NC}$: does every polynomial-time problem admit a polylogarithmic-depth circuit of polynomial size?",
+      "why": "$\\mathrm{P}$-completeness is used exactly as $\\mathrm{NP}$-completeness is — as evidence that a problem resists parallelisation — and like $\\mathrm{NP}$-completeness, the underlying separation is unproved.",
+      "evidence": [
+        {
+          "year": 1975,
+          "text": "The circuit value problem is $\\mathrm{P}$-complete under logspace reductions, as are linear programming and maximum flow, making them the canonical hard cases."
+        },
+        {
+          "year": 2026,
+          "text": "No superpolylogarithmic depth lower bound is known for any explicit problem in $\\mathrm{P}$ against unbounded fan-in circuits of polynomial size."
+        }
+      ],
+      "refs": [
+        {
+          "label": "Wikipedia: NC (complexity)",
+          "url": "https://en.wikipedia.org/wiki/NC_(complexity)"
+        },
+        {
+          "label": "Wikipedia: P-complete",
+          "url": "https://en.wikipedia.org/wiki/P-complete"
+        }
+      ],
+      "watch": {
+        "terms": [
+          "p vs nc",
+          "p = nc",
+          "p-complete",
+          "parallel complexity",
+          "nc algorithm",
+          "depth lower bound"
+        ],
+        "queries": [
+          "all:\"P-complete\"",
+          "all:\"parallel algorithm\" AND cat:cs.CC"
+        ]
+      }
+    },
+    {
+      "id": "sensitivity-conjecture",
+      "title": "The sensitivity conjecture",
+      "area": "complexity",
+      "status": "resolved",
+      "posed": 1992,
+      "statement": "Nisan–Szegedy: is the block sensitivity of a Boolean function polynomially bounded by its sensitivity? Equivalently, is sensitivity polynomially related to every other standard complexity measure (degree, certificate complexity, decision tree depth)?",
+      "why": "Sensitivity was the one measure left outside the polynomially-equivalent family that contains degree, block sensitivity and query complexity — a single conspicuous hole in an otherwise complete picture.",
+      "evidence": [
+        {
+          "year": 2015,
+          "text": "Gotsman–Linial reduced the conjecture to a statement about induced subgraphs of the hypercube: any induced subgraph on more than half the vertices has maximum degree $\\Omega(\\sqrt n)$."
+        },
+        {
+          "year": 2019,
+          "text": "The reduced statement stood for twenty-seven years before it was proved."
+        }
+      ],
+      "resolution": {
+        "year": 2019,
+        "by": "Hao Huang",
+        "text": "A two-page proof: a signed adjacency matrix of the hypercube has eigenvalues $\\pm\\sqrt n$, and eigenvalue interlacing forces any induced subgraph on more than half the vertices to have maximum degree at least $\\sqrt n$. With Gotsman–Linial this gives $\\mathrm{bs}(f)=O(s(f)^4)$.",
+        "url": "https://arxiv.org/abs/1907.00847",
+        "arxiv": "1907.00847",
+        "title": "Induced subgraphs of hypercubes and a proof of the Sensitivity Conjecture"
+      },
+      "refs": [
+        {
+          "label": "Wikipedia: Sensitivity theorem",
+          "url": "https://en.wikipedia.org/wiki/Sensitivity_theorem"
+        }
+      ],
+      "watch": {
+        "terms": [
+          "sensitivity conjecture",
+          "block sensitivity"
+        ],
+        "queries": [
+          "all:\"block sensitivity\""
+        ]
+      }
+    },
+    {
+      "id": "kadison-singer",
+      "title": "The Kadison–Singer problem",
+      "area": "combinatorics",
+      "status": "resolved",
+      "posed": 1959,
+      "statement": "Does every pure state on the algebra of bounded diagonal operators on $\\ell^2$ extend uniquely to a pure state on all bounded operators? Equivalently, in the discrete form used in TCS: Weaver's $\\mathrm{KS}_2$ conjecture on partitioning isotropic vectors into two well-conditioned halves.",
+      "why": "Its discrete form is a statement about splitting a set of vectors so that both halves keep spectral structure — exactly what spectral sparsification and the existence of Ramanujan graphs need.",
+      "evidence": [
+        {
+          "year": 1979,
+          "text": "Anderson's paving conjecture, Weaver's $\\mathrm{KS}_r$ conjectures and the Bourgain–Tzafriri restricted invertibility conjecture were all shown equivalent to the original functional-analytic statement."
+        }
+      ],
+      "resolution": {
+        "year": 2013,
+        "by": "Adam Marcus, Daniel Spielman, Nikhil Srivastava",
+        "text": "The method of interlacing families of polynomials, together with a barrier-function bound on the largest root of a mixed characteristic polynomial, proves Weaver's $\\mathrm{KS}_2$ and so the original conjecture. The same technique gave bipartite Ramanujan graphs of every degree.",
+        "url": "https://arxiv.org/abs/1306.3969",
+        "arxiv": "1306.3969",
+        "title": "Interlacing Families II: Mixed Characteristic Polynomials and the Kadison-Singer Problem"
+      },
+      "refs": [
+        {
+          "label": "Wikipedia: Kadison–Singer problem",
+          "url": "https://en.wikipedia.org/wiki/Kadison%E2%80%93Singer_problem"
+        }
+      ],
+      "watch": {
+        "terms": [
+          "kadison-singer",
+          "interlacing families",
+          "ramanujan graph"
+        ],
+        "queries": [
+          "all:\"interlacing families\""
+        ]
+      }
+    },
+    {
+      "id": "randomized-k-server",
+      "title": "The randomized k-server conjecture",
+      "area": "algorithms",
+      "status": "resolved",
+      "posed": 1990,
+      "statement": "Is there a randomised online algorithm for the $k$-server problem that is $O(\\mathrm{polylog}\\,k)$-competitive on every metric space, against oblivious adversaries?",
+      "why": "It was the working assumption behind two decades of metric-embedding-based online algorithms — randomness was expected to buy an exponential improvement over the deterministic bound of $k$.",
+      "evidence": [
+        {
+          "year": 2018,
+          "text": "Bubeck, Cohen, Lee, Lee and Mądry gave an $O(\\mathrm{polylog}(k,n))$-competitive algorithm for $n$-point metrics, which looked like a step toward the conjecture."
+        }
+      ],
+      "resolution": {
+        "year": 2022,
+        "by": "Sébastien Bubeck, Christian Coester, Yuval Rabani",
+        "text": "Refuted. They construct metric spaces on which every randomised algorithm has competitive ratio $\\Omega(\\log^2 k)$ growing without polylogarithmic bound in the right regime, showing the conjectured polylogarithmic ratio is impossible in general.",
+        "url": "https://arxiv.org/abs/2211.05753",
+        "arxiv": "2211.05753",
+        "title": "The Randomized k-Server Conjecture is False!"
+      },
+      "refs": [
+        {
+          "label": "Wikipedia: K-server problem",
+          "url": "https://en.wikipedia.org/wiki/K-server_problem"
+        }
+      ],
+      "watch": {
+        "terms": [
+          "randomized k-server",
+          "k-server conjecture"
+        ],
+        "queries": [
+          "all:\"k-server\""
+        ]
+      }
+    },
+    {
+      "id": "erdos-discrepancy",
+      "title": "The Erdős discrepancy problem",
+      "area": "combinatorics",
+      "status": "resolved",
+      "posed": 1932,
+      "statement": "For every $\\pm1$ sequence $(x_n)$ and every constant $C$, are there $d$ and $k$ with $\\left|\\sum_{i=1}^{k} x_{id}\\right| > C$?",
+      "why": "Eighty years of an elementary-sounding question about sign sequences, and the eventual proof came from analytic number theory rather than combinatorics.",
+      "evidence": [
+        {
+          "year": 2014,
+          "text": "A Polymath5 SAT-solver computation showed that discrepancy $2$ requires sequences of length at most $1160$, settling the first non-trivial case by exhaustive search."
+        }
+      ],
+      "resolution": {
+        "year": 2015,
+        "by": "Terence Tao",
+        "text": "Proved, using the Elliott conjecture on correlations of multiplicative functions (established in the averaged form needed) together with the Polymath5 reduction. Discrepancy is unbounded for every $\\pm1$ sequence.",
+        "url": "https://arxiv.org/abs/1509.05363",
+        "arxiv": "1509.05363",
+        "title": "The Erdos discrepancy problem"
+      },
+      "refs": [
+        {
+          "label": "Wikipedia: Erdős discrepancy problem",
+          "url": "https://en.wikipedia.org/wiki/Erd%C5%91s_discrepancy_problem"
+        }
+      ],
+      "watch": {
+        "terms": [
+          "erdos discrepancy",
+          "discrepancy problem"
+        ],
+        "queries": [
+          "all:\"discrepancy\" AND cat:math.CO"
+        ]
+      }
+    },
+    {
+      "id": "art-gallery-complexity",
+      "title": "The exact complexity of the art gallery problem",
+      "area": "geometry",
+      "status": "resolved",
+      "posed": 1987,
+      "statement": "Given a simple polygon and an integer $k$, decide whether $k$ guards suffice to see the whole interior. The problem was known to be $\\mathrm{NP}$-hard, but not known to be in $\\mathrm{NP}$ — where exactly does it sit?",
+      "why": "It was the flagship example of a natural geometric problem whose membership in $\\mathrm{NP}$ was in doubt, because optimal guard positions can require irrational coordinates.",
+      "evidence": [
+        {
+          "year": 2017,
+          "text": "Abrahamsen, Adamaszek and Miltzow exhibited polygons whose optimal guard placements require irrational coordinates, ruling out the obvious combinatorial certificate."
+        }
+      ],
+      "resolution": {
+        "year": 2018,
+        "by": "Mikkel Abrahamsen, Anna Adamaszek, Tillmann Miltzow",
+        "text": "The problem is $\\exists\\mathbb{R}$-complete: it is polynomial-time equivalent to deciding the truth of an existential sentence over the reals. This places it precisely, between $\\mathrm{NP}$ and $\\mathrm{PSPACE}$, and explains why no $\\mathrm{NP}$ membership proof was found.",
+        "url": "https://arxiv.org/abs/1704.06969",
+        "arxiv": "1704.06969",
+        "title": "The Art Gallery Problem is $\\exists \\mathbb{R}$-complete"
+      },
+      "refs": [
+        {
+          "label": "Wikipedia: Art gallery problem",
+          "url": "https://en.wikipedia.org/wiki/Art_gallery_problem"
+        },
+        {
+          "label": "Wikipedia: Existential theory of the reals",
+          "url": "https://en.wikipedia.org/wiki/Existential_theory_of_the_reals"
+        }
+      ],
+      "watch": {
+        "terms": [
+          "art gallery problem",
+          "exists-r-complete",
+          "existential theory of the reals"
+        ],
+        "queries": [
+          "all:\"art gallery problem\""
+        ]
+      }
+    },
+    {
+      "id": "distinct-distances",
+      "title": "The Erdős distinct distances problem",
+      "area": "geometry",
+      "status": "resolved",
+      "posed": 1946,
+      "statement": "What is the minimum number of distinct distances determined by $n$ points in the plane? Erdős conjectured $\\Theta(n/\\sqrt{\\log n})$, achieved by the square grid.",
+      "why": "It was the archetype of a problem where the extremal example was obvious and the matching lower bound was not, and its resolution introduced the polynomial method to discrete geometry.",
+      "evidence": [
+        {
+          "year": 1946,
+          "text": "The $\\sqrt n\\times\\sqrt n$ integer grid determines $\\Theta(n/\\sqrt{\\log n})$ distinct distances, giving the conjectured upper bound immediately."
+        },
+        {
+          "year": 2008,
+          "text": "A long sequence of lower bounds crept from $n^{1/2}$ up to about $n^{0.8641}$ (Katz–Tardos) using incidence geometry."
+        }
+      ],
+      "resolution": {
+        "year": 2015,
+        "by": "Larry Guth, Nets Hawk Katz",
+        "text": "Proved a lower bound of $\\Omega(n/\\log n)$ — matching the grid up to a $\\sqrt{\\log n}$ factor — via the polynomial partitioning method and an Elekes–Sharir reduction to line incidences in $\\mathbb{R}^3$. The remaining logarithmic factor is still open.",
+        "url": "https://arxiv.org/abs/1011.4105",
+        "arxiv": "1011.4105",
+        "title": "On the Erdos distinct distance problem in the plane"
+      },
+      "refs": [
+        {
+          "label": "Wikipedia: Erdős distinct distances problem",
+          "url": "https://en.wikipedia.org/wiki/Erd%C5%91s_distinct_distances_problem"
+        }
+      ],
+      "watch": {
+        "terms": [
+          "distinct distances",
+          "polynomial partitioning"
+        ],
+        "queries": [
+          "all:\"distinct distances\""
+        ]
+      }
+    }
+  ]
+}

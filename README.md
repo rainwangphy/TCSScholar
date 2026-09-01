@@ -45,9 +45,11 @@ python crawl.py --user-agent "TCSScholar/0.1 (mailto:you@example.com)"
 
 分析结果已经发布成一个静态页面：**https://rainwangphy.github.io/TCSScholar/**
 
-页面分三个 tab：**Daily digest**（每日 arXiv 速读）、**Topic analysis**、**Browse papers**，
-URL 里带 `#daily` / `#analysis` / `#browse` 可以直接进某个 tab，`#2026-08-31` 这样的日期
-则直接进那天的速读。详见下面的 [每日 arXiv 速读](#每日-arxiv-速读)。
+页面分四个 tab：**Daily digest**（每日 arXiv 速读）、**Topic analysis**、**Browse papers**、
+**Open problems**（未解问题清单），URL 里带 `#daily` / `#analysis` / `#browse` / `#open`
+可以直接进某个 tab，`#2026-08-31` 这样的日期直接进那天的速读，`#op-p-vs-np` 直接定位到
+某个未解问题。详见下面的 [每日 arXiv 速读](#每日-arxiv-速读)和
+[未解问题清单](#未解问题清单)。
 
 配色是牛皮纸风格（bone 底 + 黏土色强调），跟随系统深浅色；页面文案和模型输出都是英文。
 
@@ -58,6 +60,9 @@ python analyze.py                                        # 读 data/ 里的抓�
 python fetch_abstracts.py --mailto you@example.com       # 可选：从 OpenAlex 补摘要（约 20-40 分钟）
 python build_site.py                                     # 产出 site/index.html 和 site/abstracts/
 ```
+
+`site/daily/` 和 `site/open/` 这两份数据不进 `index.html`，页面在运行时去 fetch，所以改完
+它们不用重新构建页面。
 
 提交后 GitHub Actions（[.github/workflows/pages.yml](.github/workflows/pages.yml)）会自动部署到 Pages。
 
@@ -193,6 +198,128 @@ CDN 被挡掉时退化成显示 LaTeX 原文，信息不会少。
 `site/daily.html` 现在只是个重定向桩，把早先发出去的链接（含 `#YYYY-MM-DD` 深链）转到
 `index.html#daily`。
 
+## 未解问题清单
+
+第三条线：维护一份"TCS 里还没解决的问题"的清单，发布在首页的 **Open problems** tab
+（**https://rainwangphy.github.io/TCSScholar/#open**）。每条问题除了陈述，还写清楚
+**目前进展到哪**——最好的上下界、卡在哪个 barrier、哪些特例已经证了——这样看到的是
+"离解决还有多远"，而不只是"还没解决"。
+
+```bash
+python open_problems.py                # 扫每日归档，判新候选，写 site/open/index.json
+python open_problems.py --no-llm       # 只跑规则层，一次模型都不调
+python open_problems.py --search       # 额外去 arXiv 按登记表里的 queries 查一轮
+python open_problems.py --days 30      # 只扫最近 30 天的归档
+python open_problems.py --check-refs   # 核对登记表里的每条参考链接
+```
+
+### 清单是手写的，脚本只加线索
+
+[problems/registry.json](problems/registry.json) 是**唯一的事实来源**，手工维护，
+`open_problems.py` 只读不写。当前 37 条：31 个未解、6 个已解决。
+
+脚本做的是另一件事——**找线索**：
+
+1. **规则层（不发网络请求）** — `site/daily/` 里已经存着每天全部 arXiv TCS 论文的标题和
+   摘要，所以"有没有人解决了某个公开问题"绝大部分时候直接在已有归档里扫就行。匹配条件是
+   登记表里的关键词加上"解决了某某猜想"这类措辞（`RESOLVE_RX`），或者两个以上关键词加上
+   一句推进现有界的说法。实测 111 篇里筛出 4 篇，噪声可控。
+2. **arXiv 检索（`--search`）** — 每日归档只覆盖那五个核心分类，而很多组合和几何的结果挂在
+   `math.CO`；这条路径按登记表里的 `queries` 再查一轮补上。
+3. **模型层** — 把筛出来的送给 Gemini 判 `resolves` / `major progress` / `related` /
+   `unrelated`，连同置信度、一句话结论、**它引的那句摘要原文**和一条"要先核对什么"的提醒。
+   判成 `unrelated` 的不进产物：只有关键词匹配这一条信息，摆到页面上除了制造噪声没有别的作用。
+
+关键词是会有假朋友的，这一层的作用就是兜住它们。实测里最典型的一个：图论说的 **subcubic 是
+"最大度为 3"**，和"真正次立方时间"毫无关系，于是三篇 subcubic 图论的论文被当成 APSP 的候选
+送去判定，全部判回 `unrelated`。模型这关拦住了，但白花三次调用——所以这类词后来直接从
+`watch.terms` 里换成了 `truly subcubic`。
+
+页面上这三层是分开显示的：问题自身的证据是页面自己的文字，每条线索则明确标着是哪个模型
+判的，并把它依据的那句话原样引出来——因为那部分没有人核对过。
+
+### 脚本永远不会自己说"已解决"
+
+宣称证明了 P≠NP 的预印本每年都有好几篇，绝大多数是错的；模型只看摘要更判不了对错。所以：
+
+- 模型判 `resolves` 且置信度不低时，问题只会被标成 `claimed`，在页面最上面的
+  **Review queue** 里列出来，等人去读那篇论文；
+- 真正改状态，是人去编辑 `registry.json`，把 `status` 改成 `resolved` 并补一条 `resolution`
+  记录（谁、哪年、怎么证的、链接）——`validate()` 会强制要求这条记录带链接，
+  没有链接的"已解决"不许提交。
+
+解决掉的问题**不会被删掉**，而是移出未解列表、进到页面下方的 Resolved 区。清单本身的价值
+有一半在这里：从提出到解决隔了多少年、最后是被哪套技术拿下的。目前存了六条，包括
+Huang 2019 的敏感性猜想、Marcus–Spielman–Srivastava 2013 的 Kadison–Singer，以及
+Bubeck–Coester–Rabani 2022 **证否**的随机 k-server 猜想——证否也是解决。
+
+### 怎么增删一条
+
+编辑 [problems/registry.json](problems/registry.json)，然后跑一次 `python open_problems.py --no-llm`——
+`validate()` 会先把格式问题全部报出来（缺字段、id 重复、area 不在表里、标了 resolved 却没写
+resolution），有错就直接退出，不会写出一个半残的产物。
+
+一条问题长这样：
+
+| 字段 | 说明 |
+|------|------|
+| `id` | URL 里用，`#op-<id>` 直接定位到它，定了就别改 |
+| `title` / `statement` / `why` | 标题、精确陈述（可写 LaTeX，用 `$...$`）、为什么值得关心 |
+| `area` | 必须是 `areas` 里已有的键 |
+| `posed` | 提出年份，页面上按它排"开放最久" |
+| `evidence` | `{year, text}` 列表——**目前进展到哪**，页面上按年份排成一条时间线 |
+| `refs` | `{label, url}` 列表；arXiv 的再加 `arxiv` 和 `title`，`--check-refs` 会拿标题去核对 |
+| `watch.terms` | 关键词，命中标题或摘要才算候选 |
+| `watch.queries` | arXiv 检索式，`--search` 时用 |
+| `watch.dismissed` | `{arxiv, note}` 列表：人工读过并否掉的论文，两个字段都必填 |
+| `resolution` | 只有 resolved 才写：`{year, by, text, url}`，**url 必填** |
+
+**有人宣称解决了，但你读完觉得不成立**：往 `watch.dismissed` 里加一条
+`{"arxiv": "2512.11820", "note": "第 4 节的论证是循环的"}`。不加的话它会永远挂在复核队列里——
+判定结果是缓存的，模型每次都会给同样的答案，而"已经有人读过、不成立"这个信息只存在于读它的
+那个人脑子里。写进登记表之后它既不再占模型调用，也不再刷屏，但仍会以"reviewed and set aside"
+显示在问题卡片上：读者听说"有人证明了这个"的时候，应该看得到它被看过，以及凭什么被放下。
+
+**问题被解决了**：把 `status` 改成 `resolved`，补上 `resolution`。不用删——页面会自动把它
+移出未解列表、放进下方的 Resolved 区。
+
+**新问题**：往 `problems` 数组里加一条就行，顺序无所谓，页面自己排。
+
+### 证据链接是可核对的
+
+"提供 evidence"这句话要站得住，链接就不能是死的。`--check-refs` 会把登记表里每条链接都请求
+一遍；arXiv 链接还多查一步：**把 abs 页的真实标题取回来和登记表里写的比对**，链接活着但指向
+另一篇论文同样算错。当前 56 条链接全部通过，6 条 arXiv 引用的标题全部对上。
+
+CI 每周也跑一次这个核对，结果写进 job summary，但**不会**因此让整条流水线失败——链接失效
+是要人去修的事，不该挡住当周的清单更新。
+
+### 增量成本
+
+判一篇要花一次模型调用，而摘要不会变，所以判过的 `(问题, arXiv id)` 组合直接复用，
+每周跑一次的真实成本只有当周新出现的那几篇。
+
+缓存单独存在 `site/open/verdicts.json`，**不是从 index.json 里反推的**——一开始是反推的，
+结果跑一次 `--no-llm` 就会写出一份线索更少的产物，连带把上一轮的判定一起冲掉，下次全部重判。
+缓存不该被渲染产物的形状绑架。
+`--per-problem`（默认 3）和 `--max-judge`（默认 40）再压一道上限，`--rejudge` 才会全部重来。
+
+默认的 40 是给**每周增量**用的（一周下来真正新出现的候选没那么多）。**第一次给一份新清单
+铺底**时不够——31 个问题每个判 3 篇就是 93 次，跑到一半预算就见底，后面的问题一条线索都没有。
+铺底时把 `--max-judge` 调大，分几次跑也行：判过的进缓存，第二趟只判上一趟没轮到的。
+
+**HTTP 缓存在这里必须有有效期**（`--cache-ttl-days`，默认 1 天），这一点和每日那条线正相反：
+每日查的是不同的日期区间，URL 天然不同，永久缓存没问题；而这里的检索式**每次都一模一样**
+（"最近 N 篇匹配的论文"），永久缓存会让下一周原样重放上一周的结果，新论文一篇也看不到。
+链接核对同理——缓存住就永远检不出失效的链接。
+
+[.github/workflows/open-problems.yml](.github/workflows/open-problems.yml) 每周一 07:00 UTC 跑一次
+（比每日那条晚一小时，免得两条流水线同时往仓库推），提交 `site/open/`，再把部署流水线调起来。
+
+产物目前约 290KB（gzip 后约 80KB），和每日那条线一样是**点开这个 tab 时才 fetch** 的，
+`index.html` 一动不动。大头是每条线索都原样存了摘要——判定是模型给的，读者得能自己核对
+它依据的是什么，这个空间值得花。真嫌大就调小 `--keep-signals`（默认 6）。
+
 ## 输出
 
 默认写到 `data/`：
@@ -280,6 +407,9 @@ analyze.py                主题分析，产出 site_data.json 和作者先验�
 fetch_abstracts.py        从 OpenAlex 补摘要
 build_site.py             把分析结果嵌进模板，产出 site/index.html
 daily.py                  每日 arXiv 抓取 + 分析入口
+open_problems.py          未解问题清单：找候选解决方案 + 判定入口
+problems/
+  registry.json           未解问题登记表（手工维护，脚本只读不写）
 tcs_crawler/
   venues.py               会议 → DBLP key 映射
   http.py                 限速 / 重试 / 缓存的 HTTP 客户端（纯标准库）
@@ -288,17 +418,20 @@ tcs_crawler/
   ranking.py              每日论文的可解释打分与精选
   gemini.py               Gemini REST 客户端（纯标准库）
   digest.py               每日速读与综述的提示词和输出 schema
+  openprob.py             未解问题的登记表校验、候选发现、判定与链接核对
   topics.py               关键词主题分类规则
   models.py               Paper / Author 数据模型
   storage.py              JSONL / CSV / SQLite 输出
   cli.py                  命令行
   prolific_authors.json   五大会议高产作者表（analyze.py 产出，随仓库提交）
 site/
-  template.html           页面模板，三个 tab（__SITE_DATA__ 占位）
+  template.html           页面模板，四个 tab（__SITE_DATA__ 占位）
   index.html              构建产物，自包含
   daily.html              重定向桩，转到 index.html#daily（旧链接兼容）
   daily/YYYY-MM-DD.json   每天一份结果，同时也是这个功能的持久化存储
   daily/index.json        日期目录
+  open/index.json         未解问题清单的构建产物（登记表 + 机器找到的线索）
+  open/verdicts.json      模型判定缓存，判过的不再判
 ```
 
 ## 可能的扩展

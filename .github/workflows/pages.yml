@@ -65,6 +65,13 @@ jobs:
           else
             echo "::warning::site/daily 不存在，每日速读页会是空的（先跑 python daily.py）"
           fi
+          # 未解问题清单。和每日一样在运行时 fetch，所以也不需要本地构建
+          if [ -d site/open ]; then
+            cp -R site/open _site/open
+            echo "staged the open-problem list"
+          else
+            echo "::warning::site/open 不存在，未解问题 tab 会是空的（先跑 python open_problems.py）"
+          fi
 
       - uses: actions/upload-pages-artifact@v3
         with:
