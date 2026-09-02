@@ -7,7 +7,13 @@
     "combinatorics": "Combinatorics",
     "geometry": "Discrete geometry",
     "economics": "Game theory & fair division",
-    "optimization": "Optimization"
+    "optimization": "Optimization",
+    "quantum": "Quantum computing",
+    "learning": "Learning theory",
+    "distributed": "Distributed & parallel",
+    "crypto": "Cryptography",
+    "logic": "Logic & automata",
+    "other": "Other"
   },
   "problems": [
     {

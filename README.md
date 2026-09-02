@@ -201,9 +201,13 @@ CDN 被挡掉时退化成显示 LaTeX 原文，信息不会少。
 ## 未解问题清单
 
 第三条线：维护一份"TCS 里还没解决的问题"的清单，发布在首页的 **Open problems** tab
-（**https://rainwangphy.github.io/TCSScholar/#open**）。每条问题除了陈述，还写清楚
-**目前进展到哪**——最好的上下界、卡在哪个 barrier、哪些特例已经证了——这样看到的是
-"离解决还有多远"，而不只是"还没解决"。
+（**https://rainwangphy.github.io/TCSScholar/#open**）。里面其实是**两类**问题：
+
+- **Still open** — 领域级的大问题（P vs NP、UGC、k-server），手写维护，每条都写清楚
+  *目前进展到哪*：最好的上下界、卡在哪个 barrier、哪些特例已经证了。看的是「离解决还有多远」。
+- **From papers** — 作者在自己论文结论里留下的小问题，从全文里抽出来的。大问题几十年不动，
+  拿来挑题没用；这一类才是给想找个题做的人看的。见
+  [论文里的小问题](#论文里的小问题给挑题的人)。
 
 ```bash
 python open_problems.py                # 扫每日归档，判新候选，写 site/open/index.json
@@ -284,6 +288,71 @@ resolution），有错就直接退出，不会写出一个半残的产物。
 移出未解列表、放进下方的 Resolved 区。
 
 **新问题**：往 `problems` 数组里加一条就行，顺序无所谓，页面自己排。
+
+### 论文里的小问题（给挑题的人）
+
+登记表上那三十几条全是几十年不动的大问题——正因为如此，**它们不适合用来挑题**。所以还有
+第二类：作者在自己论文结论里留下的公开问题，数量大、难度低得多、也具体得多。
+
+```bash
+python paper_questions.py                  # 抓最近 8 天里没处理过的论文
+python paper_questions.py --days 30        # 铺底：把 30 天的归档都过一遍
+python paper_questions.py --no-llm         # 只抓全文，报命中率，不调模型
+```
+
+**为什么非要抓全文。** 一开始想的是扫摘要，实测直接否掉了这条路：111 篇论文里只有 **5%**
+的摘要提到公开问题，而且那 5 篇全都是「我们**解决了**别人留下的公开问题」，不是留新问题。
+同一批论文的**全文**里，**71%** 出现了公开问题的措辞，好几篇还专门开了一节
+（"Open Questions"、"Concluding Remarks"、"Conclusion and Future Work"）。
+**作者是在结论里留问题的，不在摘要里。**
+
+所以走 `arxiv.org/html/<id>`（arXiv 自己从 LaTeX 生成的 HTML，2023 年底以后的投稿基本都有），
+拿不到就退 `ar5iv`，两个都没有就跳过（只交了 PDF 的）。实测 6 篇里 5 篇有 arXiv HTML，
+剩下 1 篇 ar5iv 兜住了。这两个站点比 `export.arxiv.org` 宽松得多，没触发过限流。
+
+拿到 HTML 之后切成小节，取标题像 Conclusion / Discussion / Open Questions / Future Work 的
+整节，加上正文里任何出现公开问题措辞的段落，拼成一段（上限 7000 字）送给模型抽取。
+
+### 抽取的那条铁律：引不出原句就丢掉
+
+模型很容易顺着标题替作者「补」一个听起来很合理的公开问题——那种东西看着像真的，
+但**没有人说过**。所以每条抽出来的问题都必须附一句**原文**，`verify_quote()` 再拿这句话
+回到原文里比对：先看是不是子串，不是的话退一步看 5 元词组的重合度（≥60%）——
+既挡得住整句编造，又不会因为模型顺手规范化了一个空格就把真引用误杀。**对不上的整条丢掉。**
+
+页面上每条都把这句原文引出来，读者可以自己点进论文核对。
+
+每条问题还带三样东西，都是从原文里能落实的，不是让模型拍难度：
+
+| 字段 | 说明 |
+|------|------|
+| `shape` | 解决它意味着什么：`close a quantitative gap` / `remove an assumption` / `extend to a broader setting` / `new direction`。越靠前越具体，越靠后越开放 |
+| `emphasis` | `highlighted`（作者当成主要遗留问题，甚至单开一节）还是 `in passing`（顺带一提） |
+| `background` | 上手前需要先懂什么，要求写具体技术，不许写「扎实的 TCS 功底」 |
+
+**没有让模型打难度分。** 只看一段结论就给「这题好不好做」评个 1-5 分，是它给不出可靠答案的
+那类问题；上面这三样是文本里能落实的事实，读者据此自己判断更靠谱。
+
+### 两条线的分工
+
+|  | 登记表（Still open） | 论文里的（From papers） |
+|--|--|--|
+| 来源 | 手写 `problems/registry.json` | 从论文全文里抽 |
+| 数量 | 31 条 | 每天十几到二十几条 |
+| 追踪解决 | 追，有 Review queue 和 Resolved 区 | **不追**——量太大，只标日期和出处 |
+| 保留 | 永久 | `--keep-days` 默认 180 天 |
+| 用途 | 看领域卡在哪 | **挑题** |
+
+产物 `site/open/questions.json` 是**累积**的：每次只处理没处理过的论文（抓不到全文的也记上，
+免得每周为它白跑一趟），已有的原样保留。重新处理某篇时会先把它上一轮的问题摘掉再接上新的——
+不这么做的话 `--redo` 会把同一篇的问题追加两份，这个坑踩过。
+
+**想铺底的话注意 `export.arxiv.org` 的限流。** 抓全文走的是 `arxiv.org/html`，很宽松
+（92 篇连抓一次限流都没触发）；但要多几天的候选就得先用 `daily.py --days N` 补每日归档，
+那条路走的是 `export.arxiv.org`，它的限流严得多，而且是**跨脚本累计**的——
+`open_problems.py --search` 连发几十条检索之后，`daily.py` 会被按在 429 上退避到 180 秒，
+一天要磨八九分钟。真要回填就单独找个时间跑，别跟 `--search` 挤在一起；
+`daily.py` 会跳过已有的日子，分几次跑没有副作用。
 
 ### 证据链接是可核对的
 
@@ -408,6 +477,7 @@ fetch_abstracts.py        从 OpenAlex 补摘要
 build_site.py             把分析结果嵌进模板，产出 site/index.html
 daily.py                  每日 arXiv 抓取 + 分析入口
 open_problems.py          未解问题清单：找候选解决方案 + 判定入口
+paper_questions.py        从论文结论里抽作者留下的公开问题
 problems/
   registry.json           未解问题登记表（手工维护，脚本只读不写）
 tcs_crawler/
@@ -419,6 +489,8 @@ tcs_crawler/
   gemini.py               Gemini REST 客户端（纯标准库）
   digest.py               每日速读与综述的提示词和输出 schema
   openprob.py             未解问题的登记表校验、候选发现、判定与链接核对
+  fulltext.py             取 arXiv HTML 全文，切出结论/讨论那几节
+  paperq.py               从结论里抽公开问题的提示词、schema 与引文核对
   topics.py               关键词主题分类规则
   models.py               Paper / Author 数据模型
   storage.py              JSONL / CSV / SQLite 输出
@@ -432,6 +504,7 @@ site/
   daily/index.json        日期目录
   open/index.json         未解问题清单的构建产物（登记表 + 机器找到的线索）
   open/verdicts.json      模型判定缓存，判过的不再判
+  open/questions.json     论文里抽出的公开问题（累积存储）
 ```
 
 ## 可能的扩展

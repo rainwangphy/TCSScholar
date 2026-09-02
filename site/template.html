@@ -607,6 +607,36 @@ details.fold .body {
   border-left: 2px solid var(--rule-strong); padding-left: .8rem; max-width: var(--measure);
 }
 
+/* ── open problems: harvested paper questions ───────────────────────── */
+.qlist { display: flex; flex-direction: column; gap: .85rem; }
+.q {
+  border: 1px solid var(--rule); border-left: 2px solid var(--s1); border-radius: 3px;
+  background: var(--surface); padding: .95rem 1.15rem 1rem;
+}
+.q > header { display: flex; gap: .45rem; align-items: baseline; flex-wrap: wrap; margin-bottom: .5rem; }
+.q .when { font-family: var(--font-mono); font-size: .72rem; color: var(--ink-3); margin-left: auto; }
+.q .q-text { margin: 0; font-size: .96rem; font-weight: 550; line-height: 1.5; max-width: var(--measure); }
+.q .q-ctx { margin: .45rem 0 0; font-size: .86rem; color: var(--ink-2); max-width: var(--measure); }
+.q blockquote {
+  margin: .55rem 0 0; padding: .3rem 0 .3rem .75rem; border-left: 2px solid var(--rule);
+  font-size: .84rem; color: var(--ink-2); font-style: italic; max-width: var(--measure);
+}
+.q .q-src { margin: .55rem 0 0; font-size: .82rem; color: var(--ink-3); }
+.q .q-src a { color: var(--accent); text-decoration: none; border-bottom: 1px solid var(--rule-strong); }
+.q .q-src a:hover { border-color: var(--accent); }
+.q .q-need { margin: .35rem 0 0; font-size: .81rem; color: var(--ink-3); max-width: var(--measure); }
+.q .q-need b { color: var(--ink-2); font-weight: 600; }
+/* The four shapes a question can take. Colour carries how self-contained it is:
+   a quantitative gap is the most defined, an open-ended direction the least. */
+.b-gap { color: var(--pos); border-color: color-mix(in srgb, var(--pos) 45%, transparent);
+  background: color-mix(in srgb, var(--pos) 10%, transparent); }
+.b-assume { color: var(--s1); border-color: color-mix(in srgb, var(--s1) 45%, transparent);
+  background: color-mix(in srgb, var(--s1) 10%, transparent); }
+.b-extend { color: var(--s3); border-color: color-mix(in srgb, var(--s3) 45%, transparent);
+  background: color-mix(in srgb, var(--s3) 10%, transparent); }
+.b-new { color: var(--s4); border-color: color-mix(in srgb, var(--s4) 45%, transparent);
+  background: color-mix(in srgb, var(--s4) 10%, transparent); }
+
 @media (prefers-reduced-motion: reduce) {
   * { animation: none !important; transition: none !important; }
 }
@@ -881,9 +911,38 @@ details.fold .body {
         <div class="probs" id="o-list"></div>
       </section>
 
+      <!-- Harvested from the papers themselves, not hand-curated: the landmark list
+           above is deliberately made of problems that have resisted for decades, which
+           is exactly what makes it useless for picking something to work on. -->
+      <section class="block" id="q-sec" hidden>
+        <div class="sec-head">
+          <span class="sec-num">02 / From papers</span>
+          <h2>Questions the papers themselves leave open</h2>
+          <p>Everything above has stood for decades — which is what makes it a poor place to
+             start. These are the smaller questions authors state in their own conclusions:
+             a gap they could not close, an assumption they could not drop, a case they did
+             not handle. <b>Every one is quoted from the paper</b>, and a quote that cannot be
+             found in the source text is discarded rather than shown, so nothing here is a
+             question a model invented.</p>
+        </div>
+        <div class="filters">
+          <input type="search" id="q-q" placeholder="Search questions, papers, techniques…" aria-label="Search questions">
+          <select id="q-area" aria-label="Filter by area"><option value="">All areas</option></select>
+          <select id="q-shape" aria-label="Filter by what solving it means"><option value="">Any kind</option></select>
+          <select id="q-sort" aria-label="Sort order">
+            <option value="new">Newest first</option>
+            <option value="area">Area</option>
+          </select>
+          <div class="chips"><button class="chip" id="q-hl" aria-pressed="false">Highlighted only</button></div>
+        </div>
+        <div class="result-meta"><span id="q-count">—</span><span id="q-meta"></span></div>
+        <div class="qlist" id="q-list"></div>
+        <button class="more-btn hidden" id="q-more">Load more</button>
+      </section>
+
       <section class="block">
         <div class="sec-head">
-          <span class="sec-num">02 / Resolved</span>
+          <span class="sec-num">03 / Resolved</span>
           <h2>Taken off the list</h2>
           <p>Problems that were settled, kept here with the paper that did it. They are off the
              open list, but throwing the entry away would throw away the most useful part — what
@@ -1562,6 +1621,10 @@ details.fold .body {
     }
 
     const areaName = (id) => (DATA.areas && DATA.areas[id]) || id;
+    /* questions.json carries its own copy of the area vocabulary, and the two files
+       are written by different scripts — so read names from whichever one owns the
+       record, or a vocabulary added on one side shows up as a raw id on the other. */
+    const qAreaName = (id) => (QS && QS.areas && QS.areas[id]) || areaName(id);
     const openProblems = () => DATA.problems.filter((p) => p.status !== "resolved");
     const lastSignal = (p) =>
       (p.signals || []).reduce((m, s) => (s.date > m ? s.date : m), "");
@@ -1579,11 +1642,14 @@ details.fold .body {
         [(DATA.updated || "").slice(0, 10) || "—", "last checked"],
       ].map(([v, k]) => `<div class="stat"><span class="v">${esc(v)}</span><span class="k">${esc(k)}</span></div>`).join("");
 
-      const areas = Object.keys(DATA.areas || {});
-      $("#o-area").innerHTML = `<option value="">All areas</option>` + areas.map((a) => {
-        const n = openProblems().filter((p) => p.area === a).length;
-        return `<option value="${esc(a)}">${esc(areaName(a))} (${n})</option>`;
-      }).join("");
+      /* The area vocabulary is shared with the harvested paper questions, which
+         range wider than the landmark list — so only offer the areas that
+         actually have a problem in them, or the filter is mostly dead ends. */
+      const areas = Object.keys(DATA.areas || {})
+        .map((a) => [a, openProblems().filter((p) => p.area === a).length])
+        .filter(([, n]) => n > 0);
+      $("#o-area").innerHTML = `<option value="">All areas</option>` +
+        areas.map(([a, n]) => `<option value="${esc(a)}">${esc(areaName(a))} (${n})</option>`).join("");
 
       const sc = DATA.scanned || {};
       $("#o-scan").textContent = sc.days
@@ -1605,7 +1671,103 @@ details.fold .body {
       renderFlags();
       apply();
       goToHashProblem();
+      loadQuestions();
     }
+
+    /* ── harvested paper questions ──────────────────────────────────
+       A second, independent fetch: this file is generated by a different
+       script on a different cadence, and a list of landmark problems is
+       still worth showing when it is missing. So a failure here hides the
+       section rather than failing the tab. */
+    let QS = null, qShown = 0, qFiltered = [];
+    const QPAGE = 40;
+    const qState = { q: "", area: "", shape: "", hl: false, sort: "new" };
+    const SHAPE_CLASS = {
+      "close a quantitative gap": "b-gap",
+      "remove an assumption": "b-assume",
+      "extend to a broader setting": "b-extend",
+      "new direction": "b-new",
+    };
+
+    function loadQuestions() {
+      fetch("open/questions.json")
+        .then((r) => { if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); })
+        .catch(() => null)
+        .then((d) => {
+          if (!d || !(d.questions || []).length) return;
+          QS = d;
+          bootQuestions();
+        });
+    }
+
+    function bootQuestions() {
+      $("#q-sec").hidden = false;
+      const counts = {};
+      QS.questions.forEach((q) => { counts[q.area] = (counts[q.area] || 0) + 1; });
+      $("#q-area").innerHTML = `<option value="">All areas</option>` +
+        Object.entries(counts).sort((a, b) => b[1] - a[1])
+          .map(([a, n]) => `<option value="${esc(a)}">${esc(qAreaName(a))} (${n})</option>`).join("");
+      $("#q-shape").innerHTML = `<option value="">Any kind</option>` +
+        (QS.shapes || []).map((sh) => `<option value="${esc(sh)}">${esc(sh)}</option>`).join("");
+
+      const st = QS.stats || {};
+      $("#q-meta").textContent =
+        `${nf.format(st.papers_seen || 0)} papers read · ${nf.format(st.with_questions || 0)} yielded questions`;
+
+      $("#q-q").addEventListener("input", (e) => { qState.q = e.target.value.trim().toLowerCase(); applyQ(); });
+      $("#q-area").addEventListener("change", (e) => { qState.area = e.target.value; applyQ(); });
+      $("#q-shape").addEventListener("change", (e) => { qState.shape = e.target.value; applyQ(); });
+      $("#q-sort").addEventListener("change", (e) => { qState.sort = e.target.value; applyQ(); });
+      $("#q-hl").addEventListener("click", (e) => {
+        qState.hl = !qState.hl;
+        e.currentTarget.setAttribute("aria-pressed", String(qState.hl));
+        applyQ();
+      });
+      $("#q-more").addEventListener("click", () => renderQ(true));
+      applyQ();
+    }
+
+    function applyQ() {
+      qFiltered = QS.questions.filter((q) => {
+        if (qState.area && q.area !== qState.area) return false;
+        if (qState.shape && q.shape !== qState.shape) return false;
+        if (qState.hl && q.emphasis !== "highlighted") return false;
+        if (!qState.q) return true;
+        return [q.question, q.context, q.background, q.title, q.quote, qAreaName(q.area)]
+          .join(" ").toLowerCase().includes(qState.q);
+      });
+      if (qState.sort === "area") {
+        qFiltered = qFiltered.slice().sort((a, b) =>
+          a.area.localeCompare(b.area) || b.date.localeCompare(a.date));
+      }
+      qShown = 0;
+      $("#q-count").textContent =
+        `${nf.format(qFiltered.length)} ${qFiltered.length === 1 ? "question" : "questions"}`;
+      renderQ(false);
+    }
+
+    function renderQ(append) {
+      const slice = qFiltered.slice(qShown, qShown + QPAGE);
+      const html = slice.map((q) => `<article class="q">
+        <header>
+          <span class="badge ${SHAPE_CLASS[q.shape] || "b-plain"}">${esc(q.shape)}</span>
+          ${q.emphasis === "highlighted" ? `<span class="badge b-plain">highlighted by the authors</span>` : ""}
+          <span class="when">${esc(q.date || "")} · ${esc(qAreaName(q.area))}</span>
+        </header>
+        <p class="q-text">${esc(q.question)}</p>
+        <p class="q-ctx">${esc(q.context)}</p>
+        <blockquote>${esc(q.quote)}</blockquote>
+        <p class="q-src">From <a href="${esc(q.url)}" target="_blank" rel="noopener">${esc(q.title)}</a>
+          — ${esc((q.authors || []).join(", "))}</p>
+        <p class="q-need"><b>To start you would need:</b> ${esc(q.background)}</p>
+      </article>`).join("");
+      if (append) $("#q-list").insertAdjacentHTML("beforeend", html);
+      else $("#q-list").innerHTML = html || `<div class="empty">No questions match. Try relaxing the filters.</div>`;
+      qShown += slice.length;
+      $("#q-more").classList.toggle("hidden", qShown >= qFiltered.length);
+      typeset($("#q-list"));
+    }
+
 
     /* The review queue is the one place the page raises its voice, so it only
        ever shows what a person still has to check — never a verdict. */
